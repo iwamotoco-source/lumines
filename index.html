@@ -1,0 +1,1995 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
+<title>LightPlan Pro</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --accent:#0a84ff;--accent2:#5e5ce6;--green:#30d158;--red:#ff453a;
+  --orange:#ff9f0a;--purple:#bf5af2;--cyan:#32ade6;
+  --r-xs:6px;--r-sm:10px;--r-md:14px;--r-lg:18px;--r-xl:22px;
+  --tr:.22s cubic-bezier(.25,.46,.45,.94);
+  --font:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;
+  --panel-w:256px;--topbar-h:48px;--toolbar-h:42px;--statusbar-h:26px;
+}
+[data-theme="dark"]{
+  --bg:#000;--bg2:#1c1c1e;--bg3:#2c2c2e;--bg4:#3a3a3c;
+  --text:#fff;--text2:rgba(235,235,245,.6);--text3:rgba(235,235,245,.3);
+  --sep:rgba(255,255,255,.08);--glass:rgba(28,28,30,.94);
+  --shadow:0 8px 32px rgba(0,0,0,.72);--input-bg:#2c2c2e;
+}
+[data-theme="light"]{
+  --bg:#f2f2f7;--bg2:#fff;--bg3:#f2f2f7;--bg4:#e5e5ea;
+  --text:#000;--text2:rgba(60,60,67,.6);--text3:rgba(60,60,67,.3);
+  --sep:rgba(60,60,67,.1);--glass:rgba(242,242,247,.94);
+  --shadow:0 8px 32px rgba(0,0,0,.15);--input-bg:#f2f2f7;
+}
+html,body{height:100%;overflow:hidden;touch-action:none;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);display:flex;flex-direction:column;-webkit-tap-highlight-color:transparent;}
+
+/* ===== Topbar ===== */
+#topbar{
+  flex-shrink:0;height:var(--topbar-h);
+  background:var(--glass);backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:.5px solid var(--sep);
+  display:flex;align-items:center;padding:0 10px;gap:6px;
+  z-index:300;overflow-x:auto;overflow-y:hidden;
+}
+#topbar::-webkit-scrollbar{display:none;}
+.logo{display:flex;align-items:center;gap:6px;font-size:.9rem;font-weight:800;white-space:nowrap;flex-shrink:0;}
+.logo-ic{width:26px;height:26px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:var(--r-xs);display:flex;align-items:center;justify-content:center;font-size:13px;}
+.t-sep{width:.5px;height:26px;background:var(--sep);flex-shrink:0;}
+.t-grp{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.t-lbl{font-size:.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
+.t-btn{
+  background:var(--bg3);border:.5px solid var(--sep);border-radius:var(--r-sm);
+  padding:4px 9px;color:var(--text2);font-size:.72rem;font-weight:600;font-family:var(--font);
+  cursor:pointer;transition:all var(--tr);white-space:nowrap;display:flex;align-items:center;gap:3px;
+  flex-shrink:0;
+}
+.t-btn:hover{background:var(--bg4);color:var(--text);}
+.t-btn.a{background:rgba(10,132,255,.15);border-color:var(--accent);color:var(--accent);}
+.t-btn.g{background:rgba(48,209,88,.15);border-color:var(--green);color:var(--green);}
+.t-btn.r{background:rgba(255,69,58,.12);border-color:var(--red);color:var(--red);}
+.t-btn.help-btn{background:rgba(191,90,242,.15);border-color:var(--purple);color:var(--purple);}
+.t-btn.help-btn:hover{background:rgba(191,90,242,.25);}
+.t-sel,.t-num{
+  background:var(--input-bg);border:.5px solid var(--sep);border-radius:var(--r-sm);
+  padding:4px 7px;color:var(--text);font-size:.72rem;font-family:var(--font);outline:none;
+}
+.t-sel{cursor:pointer;}
+.t-num{width:58px;text-align:center;}
+.t-sel:focus,.t-num:focus{border-color:var(--accent);}
+
+/* ===== Toolbar ===== */
+#toolbar{
+  flex-shrink:0;height:var(--toolbar-h);background:var(--bg2);
+  border-bottom:.5px solid var(--sep);
+  display:flex;align-items:center;padding:0 8px;gap:4px;
+  overflow-x:auto;overflow-y:hidden;z-index:200;
+}
+#toolbar::-webkit-scrollbar{display:none;}
+.tl{
+  background:transparent;border:.5px solid transparent;border-radius:var(--r-sm);
+  padding:5px 10px;color:var(--text2);font-size:.72rem;font-weight:600;font-family:var(--font);
+  cursor:pointer;transition:all var(--tr);white-space:nowrap;display:flex;align-items:center;gap:4px;flex-shrink:0;
+}
+.tl:hover{background:var(--bg3);color:var(--text);}
+.tl.a{background:rgba(10,132,255,.15);border-color:var(--accent);color:var(--accent);}
+.tl-sep{width:.5px;height:20px;background:var(--sep);flex-shrink:0;}
+
+/* ===== Body ===== */
+#body{flex:1;display:flex;overflow:hidden;position:relative;}
+
+/* ===== Left Panel ===== */
+#lpanel{
+  width:var(--panel-w);flex-shrink:0;
+  background:var(--bg2);border-right:.5px solid var(--sep);
+  display:flex;flex-direction:column;overflow:hidden;
+  transition:transform var(--tr),width var(--tr);
+  z-index:100;
+}
+#lpanel.hidden{transform:translateX(-100%);width:0;min-width:0;}
+@media(max-width:768px){
+  #lpanel{position:absolute;top:0;left:0;bottom:0;width:min(var(--panel-w),88vw);transform:translateX(-100%);z-index:150;}
+  #lpanel.open{transform:translateX(0);}
+  #panel-overlay{position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:140;display:none;}
+  #panel-overlay.show{display:block;}
+}
+
+.lp-tabs{display:flex;border-bottom:.5px solid var(--sep);flex-shrink:0;}
+.lp-tab{flex:1;padding:9px 4px;text-align:center;font-size:.66rem;font-weight:700;color:var(--text3);cursor:pointer;transition:all var(--tr);border-bottom:2px solid transparent;}
+.lp-tab.a{color:var(--accent);border-bottom-color:var(--accent);}
+.lp-body{flex:1;overflow-y:auto;padding:10px;}
+.lp-body::-webkit-scrollbar{width:3px;}
+.lp-body::-webkit-scrollbar-thumb{background:var(--text3);border-radius:2px;}
+
+.sec-title{font-size:.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+
+/* fixture card */
+.fx-card{
+  background:var(--bg3);border:.5px solid var(--sep);border-radius:var(--r-md);
+  padding:8px 10px;margin-bottom:6px;cursor:pointer;transition:all var(--tr);
+}
+.fx-card:hover{border-color:rgba(10,132,255,.4);}
+.fx-card.sel{background:rgba(10,132,255,.1);border-color:var(--accent);}
+.fx-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}
+.fx-name{font-size:.78rem;font-weight:700;}
+.fx-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;padding:2px 5px;border-radius:4px;}
+.fx-del:hover{background:rgba(255,69,58,.15);color:var(--red);}
+.fx-meta{font-size:.65rem;color:var(--text2);}
+.badge{display:inline-block;padding:1px 5px;border-radius:20px;font-size:.6rem;font-weight:700;margin-right:3px;}
+.bl{background:rgba(48,209,88,.15);color:var(--green);}
+.bf{background:rgba(255,159,10,.15);color:var(--orange);}
+.bh{background:rgba(191,90,242,.15);color:var(--purple);}
+
+/* placed item */
+.pl-item{
+  background:var(--bg3);border:.5px solid var(--sep);border-radius:var(--r-sm);
+  padding:6px 8px;margin-bottom:5px;display:flex;align-items:center;gap:7px;
+  cursor:pointer;transition:all var(--tr);
+}
+.pl-item:hover{border-color:rgba(10,132,255,.3);}
+.pl-item.sel{border-color:var(--accent);background:rgba(10,132,255,.08);}
+.pl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.pl-body{flex:1;min-width:0;}
+.pl-name{font-size:.74rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pl-coord{font-size:.6rem;color:var(--text3);}
+.pl-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:11px;padding:2px 4px;border-radius:3px;flex-shrink:0;}
+.pl-del:hover{color:var(--red);}
+
+/* result */
+.res-box{background:var(--bg3);border:.5px solid var(--sep);border-radius:var(--r-md);padding:10px 12px;margin-bottom:8px;}
+.res-title{font-size:.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:8px;}
+.res-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;}
+.res-lbl{font-size:.7rem;color:var(--text2);}
+.res-val{font-size:.92rem;font-weight:800;}
+.res-val.gd{color:var(--green);}
+.res-val.wn{color:var(--orange);}
+.res-val.bd{color:var(--red);}
+
+/* buttons */
+.btn{
+  width:100%;padding:9px;background:var(--accent);border:none;border-radius:var(--r-md);
+  color:#fff;font-size:.8rem;font-weight:700;font-family:var(--font);cursor:pointer;
+  transition:opacity var(--tr);display:flex;align-items:center;justify-content:center;gap:5px;
+  margin-bottom:5px;
+}
+.btn:hover{opacity:.85;}
+.btn:active{opacity:.7;}
+.btn.sec{background:var(--bg3);border:.5px solid var(--sep);color:var(--text2);}
+.btn.sec:hover{border-color:var(--accent);color:var(--accent);opacity:1;}
+.btn.grn{background:var(--green);}
+.btn.org{background:var(--orange);}
+.btn.red{background:var(--red);}
+.btn.pur{background:var(--purple);}
+
+/* ===== Canvas Area ===== */
+#carea{flex:1;position:relative;overflow:hidden;background:var(--bg);touch-action:none;}
+#carea.c-pan{cursor:grab;}
+#carea.c-pan.panning{cursor:grabbing;}
+#carea.c-place,#carea.c-calib,#carea.c-wall,#carea.c-room{cursor:crosshair;}
+canvas{position:absolute;top:0;left:0;pointer-events:none;}
+#c0{z-index:1;}
+#c1{z-index:2;opacity:.6;}
+#c2{z-index:3;}
+#c3{z-index:4;}
+#c3{pointer-events:none;}
+
+/* drop overlay */
+#drop-ov{position:absolute;inset:0;z-index:50;background:rgba(10,132,255,.1);border:2px dashed var(--accent);border-radius:var(--r-lg);display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:var(--accent);pointer-events:none;opacity:0;transition:opacity .2s;}
+#drop-ov.show{opacity:1;}
+
+/* progress */
+#prog{position:absolute;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));z-index:60;transition:width .3s;pointer-events:none;}
+
+/* heat controls */
+#hctrl{
+  position:absolute;top:10px;right:10px;z-index:40;
+  background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:.5px solid var(--sep);border-radius:var(--r-md);padding:8px 10px;min-width:140px;
+}
+.hc-lbl{font-size:.62rem;font-weight:700;color:var(--text2);margin-bottom:4px;}
+.hc-row{display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.hc-row input[type=range]{flex:1;accent-color:var(--accent);}
+.hc-val{font-size:.68rem;font-weight:700;color:var(--text);min-width:26px;}
+.hc-toggles{display:flex;flex-wrap:wrap;gap:3px;}
+.hc-tog{padding:2px 7px;border-radius:20px;border:.5px solid var(--sep);background:var(--bg3);font-size:.6rem;font-weight:700;color:var(--text2);cursor:pointer;transition:all var(--tr);}
+.hc-tog.a{background:rgba(10,132,255,.15);border-color:var(--accent);color:var(--accent);}
+
+/* legend */
+#legend{position:absolute;bottom:32px;right:10px;z-index:40;background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:.5px solid var(--sep);border-radius:var(--r-md);padding:8px 10px;min-width:130px;display:none;}
+.leg-title{font-size:.62rem;font-weight:700;color:var(--text2);margin-bottom:4px;}
+#leg-canvas{width:100%;height:12px;border-radius:3px;display:block;margin-bottom:3px;}
+.leg-labels{display:flex;justify-content:space-between;font-size:.58rem;color:var(--text3);}
+
+/* FAB (mobile) */
+#fab-run{
+  position:absolute;bottom:38px;right:10px;z-index:40;
+  width:52px;height:52px;border-radius:50%;background:var(--green);border:none;
+  color:#fff;font-size:22px;cursor:pointer;
+  box-shadow:0 4px 18px rgba(48,209,88,.5);
+  display:none;align-items:center;justify-content:center;
+  transition:transform var(--tr);
+}
+#fab-run:active{transform:scale(.92);}
+@media(max-width:768px){
+  #fab-run{display:flex;}
+  #hctrl{top:auto;bottom:42px;right:70px;min-width:120px;}
+  #legend{bottom:42px;right:10px;}
+  :root{--panel-w:280px;}
+}
+
+/* statusbar */
+#sbar{flex-shrink:0;height:var(--statusbar-h);background:var(--bg2);border-top:.5px solid var(--sep);padding:0 12px;display:flex;align-items:center;gap:14px;font-size:.64rem;color:var(--text3);}
+.sb-item span{color:var(--text2);font-weight:600;}
+
+/* ===== Modals ===== */
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:800;display:flex;align-items:flex-end;justify-content:center;padding:0;opacity:0;pointer-events:none;transition:opacity .25s;}
+.mbg.open{opacity:1;pointer-events:all;}
+@media(min-width:640px){
+  .mbg{align-items:center;padding:20px;}
+  .modal{border-radius:var(--r-xl) !important;transform:scale(.95) translateY(10px) !important;}
+  .mbg.open .modal{transform:scale(1) translateY(0) !important;}
+}
+.modal{
+  background:var(--bg2);border-radius:var(--r-xl) var(--r-xl) 0 0;
+  width:100%;max-width:500px;max-height:90dvh;
+  display:flex;flex-direction:column;
+  transform:translateY(100%);
+  transition:transform .32s cubic-bezier(.32,.72,0,1);
+  box-shadow:var(--shadow);border:.5px solid var(--sep);overflow:hidden;
+}
+.mbg.open .modal{transform:translateY(0);}
+.modal-handle{width:36px;height:4px;background:var(--text3);border-radius:2px;margin:10px auto 0;flex-shrink:0;}
+.modal-hd{padding:12px 16px 10px;border-bottom:.5px solid var(--sep);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.modal-hd h2{font-size:.92rem;font-weight:700;}
+.mcl{width:26px;height:26px;background:var(--bg3);border:none;border-radius:50%;font-size:11px;cursor:pointer;color:var(--text2);}
+.mcl:hover{background:rgba(255,69,58,.15);color:var(--red);}
+.modal-body{padding:12px 16px 20px;overflow-y:auto;flex:1;}
+.modal-ft{padding:10px 16px 16px;border-top:.5px solid var(--sep);flex-shrink:0;}
+
+/* form */
+.fg{display:flex;flex-direction:column;gap:3px;margin-bottom:10px;}
+.fg label{font-size:.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;}
+.fg input,.fg select,.fg textarea{
+  background:var(--input-bg);border:.5px solid var(--sep);border-radius:var(--r-sm);
+  padding:8px 10px;color:var(--text);font-size:.84rem;font-family:var(--font);outline:none;
+  transition:border-color var(--tr);width:100%;-webkit-appearance:none;
+}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent);}
+.fg textarea{resize:vertical;min-height:50px;}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.fg-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+
+/* report table */
+.rep-table{width:100%;border-collapse:collapse;font-size:.75rem;margin-top:6px;}
+.rep-table th,.rep-table td{padding:5px 7px;border:.5px solid var(--sep);text-align:left;}
+.rep-table th{background:var(--bg3);font-weight:700;color:var(--text2);font-size:.64rem;text-transform:uppercase;}
+.rep-table tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+
+/* toast */
+#toast{position:fixed;bottom:36px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--bg3);border:.5px solid var(--sep);border-radius:var(--r-md);padding:8px 16px;font-size:.78rem;color:var(--text);box-shadow:var(--shadow);z-index:1000;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;max-width:90vw;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ===== HELP MODAL STYLES ===== */
+.help-modal{max-width:600px;}
+.help-section{margin-bottom:20px;}
+.help-section-title{
+  display:flex;align-items:center;gap:8px;
+  font-size:.86rem;font-weight:800;color:var(--text);
+  padding:8px 10px;background:var(--bg3);border-radius:var(--r-sm);
+  border-left:3px solid var(--accent);margin-bottom:10px;
+}
+.help-steps{display:flex;flex-direction:column;gap:7px;}
+.help-step{
+  display:flex;gap:10px;align-items:flex-start;
+  padding:8px 10px;background:var(--bg3);border-radius:var(--r-sm);
+  border:.5px solid var(--sep);
+}
+.help-step-num{
+  min-width:22px;height:22px;background:var(--accent);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.68rem;font-weight:800;color:#fff;flex-shrink:0;margin-top:1px;
+}
+.help-step-body{flex:1;}
+.help-step-title{font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:2px;}
+.help-step-desc{font-size:.7rem;color:var(--text2);line-height:1.6;}
+.help-step-desc code{
+  background:var(--bg4);padding:1px 5px;border-radius:3px;
+  font-size:.66rem;font-family:monospace;color:var(--accent);
+}
+.help-tip{
+  display:flex;gap:8px;align-items:flex-start;
+  padding:8px 10px;margin-top:6px;
+  background:rgba(255,159,10,.08);border:.5px solid rgba(255,159,10,.25);
+  border-radius:var(--r-sm);
+}
+.help-tip-icon{font-size:14px;flex-shrink:0;margin-top:1px;}
+.help-tip-text{font-size:.7rem;color:var(--orange);line-height:1.6;}
+.help-shortcut-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:6px;
+}
+.help-shortcut-item{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 8px;background:var(--bg3);border-radius:var(--r-sm);
+}
+.help-shortcut-key{
+  background:var(--bg4);border:.5px solid var(--sep);border-radius:4px;
+  padding:2px 7px;font-size:.66rem;font-weight:700;font-family:monospace;
+  color:var(--text);white-space:nowrap;flex-shrink:0;
+}
+.help-shortcut-desc{font-size:.68rem;color:var(--text2);}
+.help-badge{
+  display:inline-flex;align-items:center;gap:3px;
+  padding:2px 7px;border-radius:20px;font-size:.62rem;font-weight:700;
+  margin-left:4px;vertical-align:middle;
+}
+.help-badge.new{background:rgba(48,209,88,.15);color:var(--green);}
+.help-formula-box{
+  background:var(--bg3);border:.5px solid var(--sep);border-radius:var(--r-sm);
+  padding:10px 12px;margin-top:6px;font-size:.72rem;color:var(--text2);line-height:1.8;
+}
+.help-formula-box .formula{
+  color:var(--accent2);font-weight:700;font-size:.8rem;
+  display:block;margin:4px 0;font-family:monospace;
+}
+
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-thumb{background:var(--text3);border-radius:2px;}
+</style>
+
+  <link rel="manifest" href="/lumines/manifest.json">
+  <meta name="theme-color" content="#ff4d00">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="照度分布EX">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="/lumines/icon-192.png">
+  <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/lumines/sw.js').catch(()=>{});});}</script>
+</head>
+<body>
+
+<!-- ===== Topbar ===== -->
+<div id="topbar">
+  <div class="logo"><div class="logo-ic">💡</div>Light<span style="color:var(--accent)">Plan</span></div>
+  <div class="t-sep"></div>
+  <div class="t-grp">
+    <button class="t-btn" id="panel-toggle-btn" onclick="togglePanel()" title="パネル">☰</button>
+    <button class="t-btn" onclick="document.getElementById('file-inp').click()">📂 図面</button>
+    <input type="file" id="file-inp" accept="image/*,application/pdf" style="display:none" onchange="loadFile(this)"/>
+  </div>
+  <div class="t-sep"></div>
+  <div class="t-grp">
+    <span class="t-lbl">縮尺</span>
+    <select class="t-sel" id="scale-pre" onchange="applyPreset(this.value)">
+      <option value="">自由</option>
+      <option value="1">1/1</option>
+      <option value="10">1/10</option>
+      <option value="20">1/20</option>
+      <option value="50" selected>1/50</option>
+      <option value="100">1/100</option>
+      <option value="200">1/200</option>
+    </select>
+    <input class="t-num" type="number" id="px-mm" placeholder="px/mm" step="0.001" min="0.0001"/>
+    <button class="t-btn a" onclick="applyDirectCalib()">適用</button>
+  </div>
+  <div class="t-sep"></div>
+  <div class="t-grp">
+    <span class="t-lbl">天井高</span>
+    <input class="t-num" type="number" id="ceil-h" value="2500" min="100" max="20000" step="50"/>
+    <span style="font-size:.62rem;color:var(--text3)">mm</span>
+    <span class="t-lbl" style="margin-left:5px">作業面</span>
+    <input class="t-num" type="number" id="work-h" value="800" min="0" max="5000" step="50"/>
+    <span style="font-size:.62rem;color:var(--text3)">mm</span>
+  </div>
+  <div class="t-sep"></div>
+  <div class="t-grp">
+    <button class="t-btn g" onclick="runCalc()">▶ 計算</button>
+    <button class="t-btn" onclick="openReport()">📊 帳票</button>
+    <button class="t-btn" onclick="exportImg()">🖼</button>
+    <button class="t-btn" onclick="exportPDF()">📄 図面PDF</button>
+    <button class="t-btn r" onclick="clearAll()">🗑</button>
+  </div>
+  <div class="t-sep"></div>
+  <div class="t-grp">
+    <button class="t-btn help-btn" onclick="openModal('help-modal')">❓ 使い方</button>
+    <button class="t-btn" onclick="toggleTheme()">🌙</button>
+  </div>
+</div>
+
+<!-- ===== Toolbar ===== -->
+<div id="toolbar">
+  <button class="tl a" id="tl-pan"   onclick="setTool('pan')">✋ 移動</button>
+  <button class="tl"   id="tl-place" onclick="setTool('place')">💡 配置</button>
+  <div class="tl-sep"></div>
+  <button class="tl"   id="tl-wall"  onclick="setTool('wall')">🧱 壁面</button>
+  <button class="tl"   id="tl-room"  onclick="setTool('room')">🟦 部屋輪郭</button>
+  <div class="tl-sep"></div>
+  <button class="tl"   id="tl-calib" onclick="setTool('calib')">🎯 2点キャリブ</button>
+  <div class="tl-sep"></div>
+  <button class="tl" onclick="rotate(-90)">↺</button>
+  <button class="tl" onclick="rotate(90)">↻</button>
+  <button class="tl" onclick="resetView()">⊙</button>
+  <button class="tl" onclick="zoomIn()">＋</button>
+  <button class="tl" onclick="zoomOut()">－</button>
+  <div class="tl-sep"></div>
+  <span style="font-size:.64rem;color:var(--text3);white-space:nowrap">グリッド:</span>
+  <select class="t-sel" id="grid-res" style="font-size:.68rem;">
+    <option value="20">粗 20px</option>
+    <option value="10" selected>標 10px</option>
+    <option value="5">細 5px</option>
+  </select>
+  <span style="font-size:.64rem;color:var(--text3);white-space:nowrap;margin-left:4px">反射率:</span>
+  <input class="t-num" type="number" id="reflectance" value="50" min="0" max="90" step="5"/>
+  <span style="font-size:.62rem;color:var(--text3)">%</span>
+</div>
+
+<!-- ===== Body ===== -->
+<div id="body">
+
+  <!-- panel overlay (mobile) -->
+  <div id="panel-overlay" onclick="closePanel()"></div>
+
+  <!-- Left Panel -->
+  <div id="lpanel">
+    <div class="lp-tabs">
+      <div class="lp-tab a" id="tab-db"     onclick="switchTab('db')">器具DB</div>
+      <div class="lp-tab"   id="tab-placed" onclick="switchTab('placed')">配置</div>
+      <div class="lp-tab"   id="tab-result" onclick="switchTab('result')">結果</div>
+    </div>
+
+    <!-- DB Tab -->
+    <div class="lp-body" id="cont-db">
+      <div style="margin-bottom:10px;">
+        <div class="sec-title">器具を追加</div>
+        <button class="btn sec" onclick="openFxModal(null)">＋ 器具を作成</button>
+        <button class="btn sec" onclick="document.getElementById('ies-inp').click()">📂 IESファイル</button>
+        <input type="file" id="ies-inp" accept=".ies" style="display:none" onchange="loadIES(this)"/>
+      </div>
+      <div class="sec-title">プリセット</div>
+      <div id="db-preset"></div>
+      <div class="sec-title" style="margin-top:12px">カスタム</div>
+      <div id="db-custom"></div>
+    </div>
+
+    <!-- Placed Tab -->
+    <div class="lp-body" id="cont-placed" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div class="sec-title" style="margin-bottom:0">配置済 <span id="pl-count">0</span>台</div>
+        <button class="tl" style="font-size:.64rem;padding:3px 8px;" onclick="clearPlaced()">全削除</button>
+      </div>
+      <div id="pl-list"></div>
+    </div>
+
+    <!-- Result Tab -->
+    <div class="lp-body" id="cont-result" style="display:none">
+      <div class="res-box">
+        <div class="res-title">📊 照度統計</div>
+        <div class="res-row"><span class="res-lbl">平均照度 Eav</span><span class="res-val" id="r-avg">-</span></div>
+        <div class="res-row"><span class="res-lbl">最大照度 Emax</span><span class="res-val" id="r-max">-</span></div>
+        <div class="res-row"><span class="res-lbl">最小照度 Emin</span><span class="res-val" id="r-min">-</span></div>
+        <div class="res-row"><span class="res-lbl">均斉度 Uo</span><span class="res-val" id="r-uo">-</span></div>
+        <div class="res-row"><span class="res-lbl">均斉度 Ug</span><span class="res-val" id="r-ug">-</span></div>
+      </div>
+      <div class="res-box">
+        <div class="res-title">🏗 空間</div>
+        <div class="res-row"><span class="res-lbl">天井高</span><span class="res-val" id="r-ch">-</span></div>
+        <div class="res-row"><span class="res-lbl">取付高 H</span><span class="res-val" id="r-mh">-</span></div>
+        <div class="res-row"><span class="res-lbl">器具台数</span><span class="res-val" id="r-cnt">-</span></div>
+        <div class="res-row"><span class="res-lbl">総光束</span><span class="res-val" id="r-lm">-</span></div>
+      </div>
+      <button class="btn grn" onclick="runCalc()">▶ 再計算</button>
+      <button class="btn org" onclick="openReport()">📊 帳票を開く</button>
+      <button class="btn" onclick="exportReportPDF()">📄 帳票PDFを出力</button>
+      <button class="btn sec" onclick="exportImg()">🖼 画像で保存</button>
+    </div>
+  </div>
+
+  <!-- Canvas Area -->
+  <div id="carea" class="c-pan"
+       ondragover="ev_dragover(event)" ondrop="ev_drop(event)"
+       oncontextmenu="return false">
+    <canvas id="c0"></canvas>
+    <canvas id="c1"></canvas>
+    <canvas id="c2"></canvas>
+    <canvas id="c3"></canvas>
+    <div id="drop-ov">📂 図面をドロップ</div>
+    <div id="prog" style="width:0%"></div>
+
+    <!-- Heat controls -->
+    <div id="hctrl">
+      <div class="hc-lbl">表示設定</div>
+      <div class="hc-row">
+        <span class="hc-lbl">透明度</span>
+        <input type="range" min="0" max="100" value="60" id="heat-op" oninput="setHeatOp(this.value)"/>
+        <span class="hc-val" id="heat-op-v">60%</span>
+      </div>
+      <div class="hc-toggles">
+        <button class="hc-tog a" id="tog-heat"    onclick="toggleLayer('heat')">熱分布</button>
+        <button class="hc-tog a" id="tog-contour" onclick="toggleLayer('contour')">等照度</button>
+        <button class="hc-tog a" id="tog-value"   onclick="toggleLayer('value')">数値</button>
+        <button class="hc-tog a" id="tog-fixture" onclick="toggleLayer('fixture')">器具</button>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div id="legend">
+      <div class="leg-title">照度 [lux]</div>
+      <canvas id="leg-canvas" height="12"></canvas>
+      <div class="leg-labels"><span id="leg-min">0</span><span id="leg-max">0</span></div>
+    </div>
+
+    <!-- Mobile FAB -->
+    <button id="fab-run" onclick="runCalc()" title="照度計算">▶</button>
+  </div>
+</div>
+
+<!-- statusbar -->
+<div id="sbar">
+  <div class="sb-item">ツール: <span id="sb-tool">移動</span></div>
+  <div class="sb-item">ズーム: <span id="sb-zoom">100%</span></div>
+  <div class="sb-item">縮尺: <span id="sb-scale">未設定</span></div>
+  <div class="sb-item">座標: <span id="sb-pos">-</span></div>
+  <div class="sb-item">照度: <span id="sb-lux">-</span></div>
+</div>
+
+<!-- ===== Fixture Modal ===== -->
+<div class="mbg" id="fx-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-hd"><h2 id="fm-title">💡 器具を作成</h2><button class="mcl" onclick="closeModal('fx-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="fg-row">
+        <div class="fg"><label>器具名 *</label><input id="fm-name" placeholder="LEDダウンライト φ150"/></div>
+        <div class="fg"><label>メーカー</label><input id="fm-maker" placeholder="汎用"/></div>
+      </div>
+      <div class="fg-row">
+        <div class="fg"><label>種別</label>
+          <select id="fm-type"><option value="led">LED</option><option value="fl">蛍光灯</option><option value="hid">HID</option><option value="other">その他</option></select>
+        </div>
+        <div class="fg"><label>光束 (lm)</label><input type="number" id="fm-lm" value="1500" min="1" step="50"/></div>
+      </div>
+      <div class="fg-row3">
+        <div class="fg"><label>消費電力 W</label><input type="number" id="fm-w" value="14" min="1"/></div>
+        <div class="fg"><label>色温度 K</label><input type="number" id="fm-cct" value="4000" min="2700" max="6500" step="100"/></div>
+        <div class="fg"><label>Ra</label><input type="number" id="fm-ra" value="80" min="0" max="100"/></div>
+      </div>
+      <div class="fg-row">
+        <div class="fg"><label>配光角 °</label><input type="number" id="fm-beam" value="90" min="5" max="180" step="5"/></div>
+        <div class="fg"><label>効率 %</label><input type="number" id="fm-eff" value="85" min="1" max="100"/></div>
+      </div>
+      <div class="fg-row">
+        <div class="fg"><label>配光タイプ</label>
+          <select id="fm-dist">
+            <option value="lambertian">全拡散（コサイン）</option>
+            <option value="narrow">狭角 (20°)</option>
+            <option value="medium">中角 (40°)</option>
+            <option value="wide">広角 (70°)</option>
+            <option value="bat">バットウイング</option>
+            <option value="asym">非対称（壁面）</option>
+          </select>
+        </div>
+        <div class="fg"><label>マーカー色</label><input type="color" id="fm-col" value="#ffd60a"/></div>
+      </div>
+      <div class="fg"><label>メモ</label><textarea id="fm-note" placeholder="型番・仕様など"></textarea></div>
+      <div id="ies-prev-wrap" style="display:none;margin-top:4px;">
+        <div style="font-size:.62rem;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:4px;">IES 配光プレビュー</div>
+        <canvas id="ies-prev" width="240" height="150" style="width:100%;border-radius:var(--r-sm);background:var(--bg3);border:.5px solid var(--sep);display:block;"></canvas>
+      </div>
+    </div>
+    <div class="modal-ft"><button class="btn" onclick="saveFx()">💾 保存</button></div>
+  </div>
+</div>
+
+<!-- ===== Calib Modal ===== -->
+<div class="mbg" id="calib-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-hd"><h2>🎯 2点キャリブレーション</h2><button class="mcl" onclick="closeModal('calib-modal')">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:.8rem;color:var(--text2);margin-bottom:12px">測定距離: <strong id="calib-px" style="color:var(--text)">-</strong> px</p>
+      <div class="fg-row">
+        <div class="fg"><label>実寸 *</label><input type="number" id="calib-real" placeholder="1000" min="0.001" step="1"/></div>
+        <div class="fg"><label>単位</label>
+          <select id="calib-unit"><option value="mm">mm</option><option value="cm">cm</option><option value="m">m</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ft"><button class="btn" onclick="confirmCalib()">✅ 適用</button></div>
+  </div>
+</div>
+
+<!-- ===== Report Modal ===== -->
+<div class="mbg" id="rep-modal">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-handle"></div>
+    <div class="modal-hd"><h2>📊 照度計算帳票</h2><button class="mcl" onclick="closeModal('rep-modal')">✕</button></div>
+    <div class="modal-body" id="rep-body"></div>
+    <div class="modal-ft" style="display:flex;gap:8px;">
+      <button class="btn" style="flex:1" onclick="exportReportPDF()">📄 PDF出力</button>
+      <button class="btn sec" style="flex:1" onclick="closeModal('rep-modal')">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HELP MODAL ===== -->
+<div class="mbg" id="help-modal">
+  <div class="modal help-modal" style="max-width:600px;">
+    <div class="modal-handle"></div>
+    <div class="modal-hd">
+      <h2>❓ LightPlan Pro 使い方ガイド</h2>
+      <button class="mcl" onclick="closeModal('help-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- STEP 1 -->
+      <div class="help-section">
+        <div class="help-section-title">📋 基本的な使い方（5ステップ）</div>
+        <div class="help-steps">
+          <div class="help-step">
+            <div class="help-step-num">1</div>
+            <div class="help-step-body">
+              <div class="help-step-title">📂 図面を読み込む</div>
+              <div class="help-step-desc">
+                上部の <code>📂 図面</code> ボタンをクリックするか、キャンバスに<strong>ドラッグ＆ドロップ</strong>して図面を読み込みます。<br>
+                対応形式：<strong>PDF・PNG・JPG・GIF</strong>。PDFは1ページ目が自動で読み込まれます。
+              </div>
+            </div>
+          </div>
+          <div class="help-step">
+            <div class="help-step-num">2</div>
+            <div class="help-step-body">
+              <div class="help-step-title">📏 縮尺を設定する</div>
+              <div class="help-step-desc">
+                <strong>方法A（プリセット）：</strong>上部の縮尺セレクタで <code>1/50</code> 等を選択し「適用」をクリック。<br>
+                <strong>方法B（2点キャリブ）：</strong>ツールバーの <code>🎯 2点キャリブ</code> をクリック → 図面上の既知の距離の両端を2回クリック → 実寸値を入力して「適用」。より正確な縮尺設定が可能です。
+              </div>
+            </div>
+          </div>
+          <div class="help-step">
+            <div class="help-step-num">3</div>
+            <div class="help-step-body">
+              <div class="help-step-title">💡 照明器具を配置する</div>
+              <div class="help-step-desc">
+                左パネル「<strong>器具DB</strong>」タブから器具をクリックして選択（自動的に配置モードになります）。<br>
+                図面上をクリックすると器具が配置されます。カスタム器具を作成したり、<strong>IESファイル</strong>を読み込むことも可能です。
+              </div>
+            </div>
+          </div>
+          <div class="help-step">
+            <div class="help-step-num">4</div>
+            <div class="help-step-body">
+              <div class="help-step-title">⚙️ 空間条件を設定する</div>
+              <div class="help-step-desc">
+                上部で <strong>天井高</strong>（mm）と <strong>作業面高さ</strong>（mm）を設定します。デフォルトは天井高2500mm・作業面800mm。<br>
+                ツールバーで <strong>反射率</strong>（壁・天井・床の平均）を設定します（デフォルト50%）。
+              </div>
+            </div>
+          </div>
+          <div class="help-step">
+            <div class="help-step-num">5</div>
+            <div class="help-step-body">
+              <div class="help-step-title">▶ 照度計算を実行する</div>
+              <div class="help-step-desc">
+                上部の <code>▶ 計算</code> ボタン（またはスマホの緑の丸ボタン）をクリック。<br>
+                計算完了後、図面上に<strong>ヒートマップ</strong>と<strong>等照度線</strong>が表示されます。左パネル「結果」タブで照度統計を確認できます。
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="help-tip">
+          <div class="help-tip-icon">💡</div>
+          <div class="help-tip-text">計算精度はツールバーの「グリッド」で調整できます。<strong>粗(20px)＝高速</strong>、<strong>細(5px)＝高精度</strong>。大きな図面では最初は「粗」で試すことをおすすめします。</div>
+        </div>
+      </div>
+
+      <!-- PDF OUTPUT -->
+      <div class="help-section">
+        <div class="help-section-title">📄 PDF出力機能 <span class="help-badge new">NEW</span></div>
+        <div class="help-steps">
+          <div class="help-step">
+            <div class="help-step-num" style="background:var(--green)">A</div>
+            <div class="help-step-body">
+              <div class="help-step-title">📄 図面PDF（ヒートマップ込み）</div>
+              <div class="help-step-desc">
+                上部の <code>📄 図面PDF</code> ボタンをクリック。図面＋ヒートマップ＋等照度線を重ねた画像をPDFに変換して保存します。<strong>現在の表示がそのまま出力されます。</strong>
+              </div>
+            </div>
+          </div>
+          <div class="help-step">
+            <div class="help-step-num" style="background:var(--orange)">B</div>
+            <div class="help-step-body">
+              <div class="help-step-title">📊 計算帳票PDF（A4レポート）</div>
+              <div class="help-step-desc">
+                上部の <code>📊 帳票</code> ボタンで帳票モーダルを開き、下部の <code>📄 PDF出力</code> をクリック。または左パネル「結果」タブの <code>📄 帳票PDFを出力</code> から直接出力できます。<br>
+                <strong>A4縦</strong>で出力され、空間条件・照度計算結果・使用器具一覧・照度分布図が1枚にまとまります。
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="help-tip">
+          <div class="help-tip-icon">⚠️</div>
+          <div class="help-tip-text">PDF出力には <strong>jsPDF</strong> ライブラリをオンラインで読み込みます。初回のみ数秒かかります。オフライン環境では使用できません。</div>
+        </div>
+      </div>
+
+      <!-- TOOLS -->
+      <div class="help-section">
+        <div class="help-section-title">🛠 ツール説明</div>
+        <div class="help-steps">
+          <div class="help-step">
+            <div class="help-step-num" style="background:var(--text3);font-size:.6rem">✋</div>
+            <div class="help-step-body">
+              <div class="help-step-title">移動モード（パン）</div>
+              <div class="help-step-desc">図面をドラッグして移動。マウスホイールまたはピンチ操作でズーム。</div>
+            </div>
+          </div>
+          <div class="help-step">
+            <div class="help-step-num" style="background:var(--orange)">💡</div>
+            <div class="help-step-body">
+              <div class="help-step-title">配置モード</div>
+              <div class="help-step-desc">器具DBで器具を選択すると自動で切り替わります。図面上をクリックして器具を配置。配置済み器具は「配置」タブで確認・削除できます。</div>
+            </div>
+          </div>
+          <div class="help-step">
+            <div class="help-step-num" style="background:var(--orange);font-size:.6rem">🧱</div>
+            <div class="help-step-body">
+              <div class="help-step-title">壁面モード</div>
+              <div class="help-step-desc">図面上をクリックして壁のラインを描きます。<strong>ダブルクリック</strong>で確定。複数の壁を登録できます。</div>
+            </div>
+          </div>
+          <div class="help-step">
+            <div class="help-step-num" style="background:var(--accent);font-size:.6rem">🟦</div>
+            <div class="help-step-body">
+              <div class="help-step-title">部屋輪郭モード</div>
+              <div class="help-step-desc">部屋の輪郭をクリックで描きます。<strong>ダブルクリック</strong>で閉じます。3点以上必要です。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DISPLAY -->
+      <div class="help-section">
+        <div class="help-section-title">👁 表示コントロール</div>
+        <div class="help-steps">
+          <div class="help-step">
+            <div class="help-step-num" style="background:var(--purple);font-size:.55rem">🎨</div>
+            <div class="help-step-body">
+              <div class="help-step-title">右上パネルで表示を切り替え</div>
+              <div class="help-step-desc">
+                <strong>熱分布</strong>：カラーヒートマップの表示/非表示<br>
+                <strong>等照度</strong>：等照度線（コンター）の表示/非表示<br>
+                <strong>数値</strong>：グリッド上の照度数値の表示/非表示<br>
+                <strong>器具</strong>：配置済み器具マーカーの表示/非表示<br>
+                透明度スライダーでヒートマップの不透明度を調整できます。
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="help-tip">
+          <div class="help-tip-icon">🎨</div>
+          <div class="help-tip-text">カラースケール：<strong style="color:#00f">青</strong>（低照度）→ <strong style="color:#0ff">シアン</strong> → <strong style="color:#0f0">緑</strong> → <strong style="color:#ff0">黄</strong> → <strong style="color:#f80">オレンジ</strong> → <strong style="color:#f00">赤</strong>（高照度）</div>
+        </div>
+      </div>
+
+      <!-- CALCULATION -->
+      <div class="help-section">
+        <div class="help-section-title">🔢 計算式について</div>
+        <div class="help-formula-box">
+          点計算法（Point-by-Point Method）を使用しています。
+          <span class="formula">E = I(θ) × cos³(θ) / H²</span>
+          E：照度[lux]、I(θ)：入射角θでの光度[cd]、H：器具取付高[m]、θ：入射角<br>
+          反射補正：<span class="formula" style="font-size:.7rem">E_total = E_direct × (1 + ρ × 0.28)</span>
+          ρ：反射率[0〜1]。均斉度目標: <strong>Uo ≥ 0.7</strong>（推奨）、<strong>Ug ≥ 0.3</strong>（推奨）[JIS Z 9110参考]
+        </div>
+      </div>
+
+      <!-- SHORTCUTS -->
+      <div class="help-section">
+        <div class="help-section-title">⌨️ キーボードショートカット</div>
+        <div class="help-shortcut-grid">
+          <div class="help-shortcut-item"><span class="help-shortcut-key">R</span><span class="help-shortcut-desc">照度計算を実行</span></div>
+          <div class="help-shortcut-item"><span class="help-shortcut-key">P</span><span class="help-shortcut-desc">移動モードに切替</span></div>
+          <div class="help-shortcut-item"><span class="help-shortcut-key">+</span><span class="help-shortcut-desc">ズームイン</span></div>
+          <div class="help-shortcut-item"><span class="help-shortcut-key">-</span><span class="help-shortcut-desc">ズームアウト</span></div>
+          <div class="help-shortcut-item"><span class="help-shortcut-key">Delete</span><span class="help-shortcut-desc">選択中の器具を削除</span></div>
+          <div class="help-shortcut-item"><span class="help-shortcut-key">Esc</span><span class="help-shortcut-desc">操作をキャンセル</span></div>
+        </div>
+      </div>
+
+      <!-- NOTES -->
+      <div class="help-section">
+        <div class="help-section-title">⚠️ 注意事項</div>
+        <div class="help-steps">
+          <div class="help-step">
+            <div class="help-step-num" style="background:var(--red);font-size:.55rem">!</div>
+            <div class="help-step-body">
+              <div class="help-step-title">簡易シミュレーションについて</div>
+              <div class="help-step-desc">本ツールは点計算法による<strong>簡易シミュレーション</strong>です。反射・間接光は近似計算のため、精密な照明設計にはDIALux・Relux等の専用ソフトを使用してください。</div>
+            </div>
+          </div>
+          <div class="help-step">
+            <div class="help-step-num" style="background:var(--red);font-size:.55rem">!</div>
+            <div class="help-step-body">
+              <div class="help-step-title">データの保存について</div>
+              <div class="help-step-desc">データはブラウザメモリにのみ保存されます。<strong>ページを閉じると全データが消えます。</strong>PDF出力や画像保存でこまめにバックアップしてください。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-ft">
+      <button class="btn pur" onclick="closeModal('help-modal')">✅ 閉じる</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ============================================================
+// PRESET FIXTURES
+// ============================================================
+const PRESETS = [
+  {id:'p01',name:'LEDダウンライト φ100',maker:'汎用',type:'led',lm:800,  w:8, cct:4000,ra:83,beam:90, dist:'lambertian',eff:90,col:'#ffd60a',note:'小型'},
+  {id:'p02',name:'LEDダウンライト φ150',maker:'汎用',type:'led',lm:1500, w:14,cct:4000,ra:85,beam:90, dist:'lambertian',eff:90,col:'#ffd60a',note:'標準'},
+  {id:'p03',name:'LEDダウンライト φ200',maker:'汎用',type:'led',lm:2500, w:22,cct:4000,ra:85,beam:90, dist:'lambertian',eff:88,col:'#ff9f0a',note:'大型'},
+  {id:'p04',name:'LEDスポット 狭角 20°',maker:'汎用',type:'led',lm:1200, w:12,cct:3000,ra:90,beam:20, dist:'narrow',    eff:87,col:'#30d158',note:''},
+  {id:'p05',name:'LEDスポット 中角 40°',maker:'汎用',type:'led',lm:1200, w:12,cct:3000,ra:90,beam:40, dist:'medium',    eff:87,col:'#30d158',note:''},
+  {id:'p06',name:'LEDスポット 広角 70°',maker:'汎用',type:'led',lm:1500, w:15,cct:3000,ra:90,beam:70, dist:'wide',      eff:87,col:'#30d158',note:''},
+  {id:'p07',name:'LEDベースライト 40W型',maker:'汎用',type:'led',lm:3200, w:32,cct:4000,ra:83,beam:120,dist:'bat',       eff:91,col:'#32ade6',note:''},
+  {id:'p08',name:'LEDライン 1200mm',    maker:'汎用',type:'led',lm:4000, w:36,cct:4000,ra:80,beam:120,dist:'wide',      eff:92,col:'#32ade6',note:''},
+  {id:'p09',name:'Hf蛍光灯 FHF32×2',  maker:'汎用',type:'fl', lm:6600, w:62,cct:5000,ra:84,beam:120,dist:'wide',      eff:85,col:'#bf5af2',note:''},
+  {id:'p10',name:'LEDウォールウォッシャー',maker:'汎用',type:'led',lm:1800,w:18,cct:3000,ra:85,beam:80,dist:'asym',      eff:85,col:'#ff453a',note:'壁面照射'},
+];
+
+// ============================================================
+// STATE
+// ============================================================
+const S = {
+  tool:'pan',
+  image:null, imageName:'',
+  rotation:0,
+  vx:0, vy:0, vz:1,
+  pxPerMm:null,
+  panning:{on:false,sx:0,sy:0,ox:0,oy:0},
+  calib2:{step:0,p1:null,p2:null},
+  wallDraw:{pts:[]},
+  roomDraw:{pts:[]},
+  walls:[],
+  roomPoly:[],
+  customFx:[],
+  selFxId:null,
+  placed:[],
+  selPlId:null,
+  editFxId:null,
+  iesData:null,
+  calcRes:null,
+  layers:{heat:true,contour:true,value:true,fixture:true},
+  tc:[], lastDist:0,
+};
+
+// ============================================================
+// CANVAS
+// ============================================================
+const CA   = document.getElementById('carea');
+const c0   = document.getElementById('c0');
+const c1   = document.getElementById('c1');
+const c2   = document.getElementById('c2');
+const c3   = document.getElementById('c3');
+const x0   = c0.getContext('2d');
+const x1   = c1.getContext('2d');
+const x2   = c2.getContext('2d');
+const x3   = c3.getContext('2d');
+
+function resizeCvs(){
+  const w=CA.clientWidth, h=CA.clientHeight;
+  [c0,c1,c2,c3].forEach(c=>{c.width=w;c.height=h;});
+  redrawAll();
+}
+window.addEventListener('resize',resizeCvs);
+
+function c2i(cx,cy){return{x:(cx-S.vx)/S.vz,y:(cy-S.vy)/S.vz};}
+function i2c(ix,iy){return{x:ix*S.vz+S.vx,y:iy*S.vz+S.vy};}
+function pxMm(px){return S.pxPerMm?px*S.pxPerMm:0;}
+
+// ============================================================
+// UTILS
+// ============================================================
+function uid(){return Math.random().toString(36).slice(2)+Date.now().toString(36);}
+function pad(n){return String(n).padStart(2,'0');}
+let _tt;
+function toast(m,d=2800){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>e.classList.remove('show'),d);}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.mbg').forEach(b=>b.addEventListener('click',e=>{if(e.target===b)closeModal(b.id);}));
+function prog(p){const e=document.getElementById('prog');e.style.width=p+'%';if(p>=100)setTimeout(()=>e.style.width='0%',600);}
+
+// ============================================================
+// THEME
+// ============================================================
+function toggleTheme(){
+  const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  document.querySelector('#topbar .t-btn:last-child').textContent=t==='dark'?'🌙':'☀️';
+  redrawAll();
+}
+
+// ============================================================
+// FILE LOAD
+// ============================================================
+function loadFile(inp){const f=inp.files[0];if(!f)return;inp.value='';loadFobj(f);}
+function loadFobj(f){
+  S.imageName=f.name;
+  if(f.type==='application/pdf')loadPDF(f);
+  else{
+    const rd=new FileReader();
+    rd.onload=e=>{const img=new Image();img.onload=()=>{S.image=img;resetView();toast('✅ 画像を読み込みました');};img.src=e.target.result;};
+    rd.readAsDataURL(f);
+  }
+}
+async function loadPDF(f){
+  toast('⏳ PDF読み込み中...',30000);prog(20);
+  if(!window.pdfjsLib){
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+  prog(50);
+  const ab=await f.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+  const page=await pdf.getPage(1);
+  const vp=page.getViewport({scale:2.0});
+  const off=document.createElement('canvas');
+  off.width=vp.width;off.height=vp.height;
+  await page.render({canvasContext:off.getContext('2d'),viewport:vp}).promise;
+  prog(90);
+  const img=new Image();
+  img.onload=()=>{S.image=img;resetView();toast('✅ PDFを読み込みました（1ページ目）');prog(100);};
+  img.src=off.toDataURL();
+}
+function loadScript(src){
+  return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});
+}
+
+// ============================================================
+// IES PARSER
+// ============================================================
+function parseIES(txt){
+  const lines=txt.split(/\r?\n/);
+  const meta={};
+  let di=-1;
+  for(let i=0;i<lines.length;i++){
+    const l=lines[i].trim();
+    const m=l.match(/^\[(.+?)\]\s*(.*)/);
+    if(m)meta[m[1]]=m[2];
+    if(l.toUpperCase().startsWith('TILT')){di=i+1;break;}
+  }
+  if(di<0)return null;
+  const toks=[];
+  for(let i=di;i<lines.length;i++)lines[i].trim().split(/\s+/).forEach(t=>{if(t!=='')toks.push(parseFloat(t));});
+  let k=0;
+  const lamps=toks[k++],lmPerLamp=toks[k++],mult=toks[k++];
+  const nV=toks[k++],nH=toks[k++];
+  k+=5;
+  const ballast=toks[k++];k+=2;
+  const inputW=isNaN(toks[k])?0:toks[k++];
+  const vA=[],hA=[],cd=[];
+  for(let i=0;i<nV;i++)vA.push(toks[k++]);
+  for(let i=0;i<nH;i++)hA.push(toks[k++]);
+  for(let h=0;h<nH;h++){const row=[];for(let v=0;v<nV;v++)row.push((toks[k++]||0)*mult*ballast);cd.push(row);}
+  const totalLm=Math.abs(lmPerLamp)*lamps;
+  return{meta,lamps,lmPerLamp,totalLm,inputW,vA,hA,cd,nV,nH};
+}
+
+function iesGetCd(ies,degTheta){
+  if(!ies)return 0;
+  const {vA,cd}=ies;
+  const row=cd[0];
+  for(let i=0;i<vA.length-1;i++){
+    if(degTheta>=vA[i]&&degTheta<=vA[i+1]){
+      const t=(degTheta-vA[i])/(vA[i+1]-vA[i]);
+      return row[i]*(1-t)+row[i+1]*t;
+    }
+  }
+  return degTheta<=vA[0]?row[0]:row[row.length-1];
+}
+
+function loadIES(inp){
+  const f=inp.files[0];if(!f)return;inp.value='';
+  const rd=new FileReader();
+  rd.onload=e=>{
+    const ies=parseIES(e.target.result);
+    if(!ies){toast('❌ IES解析失敗');return;}
+    S.iesData=ies;
+    openFxModal(null);
+    if(ies.totalLm>0)document.getElementById('fm-lm').value=Math.round(ies.totalLm);
+    if(ies.inputW>0)document.getElementById('fm-w').value=Math.round(ies.inputW);
+    document.getElementById('fm-name').value=ies.meta?.LUMINAIRE||f.name.replace('.ies','');
+    document.getElementById('fm-dist').value='ies';
+    drawIESPrev(ies);
+    toast('✅ IESを読み込みました');
+  };
+  rd.readAsText(f);
+}
+
+function drawIESPrev(ies){
+  document.getElementById('ies-prev-wrap').style.display='block';
+  const cv=document.getElementById('ies-prev');
+  const ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height,cx=W/2,cy=H*0.9,R=Math.min(W,H)*0.78;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#1c1c1e';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=0.5;
+  [0.25,0.5,0.75,1].forEach(r=>{ctx.beginPath();ctx.arc(cx,cy,R*r,Math.PI,2*Math.PI);ctx.stroke();});
+  ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(cx-R-8,cy);ctx.lineTo(cx+R+8,cy);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx,cy-R-8);ctx.stroke();
+  const maxCd=Math.max(...ies.cd[0]);
+  if(maxCd<=0)return;
+  ctx.beginPath();
+  for(let d=0;d<=180;d++){
+    const cd=iesGetCd(ies,d);const r=(cd/maxCd)*R;
+    const rad=(d-90)*Math.PI/180;
+    const px=cx+r*Math.sin(rad),py=cy-r*Math.cos(rad);
+    d===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+  }
+  for(let d=180;d>=0;d--){
+    const cd=iesGetCd(ies,d);const r=(cd/maxCd)*R;
+    const rad=(-d+90)*Math.PI/180;
+    ctx.lineTo(cx+r*Math.sin(rad),cy-r*Math.cos(rad));
+  }
+  ctx.closePath();
+  ctx.fillStyle='rgba(255,214,0,0.2)';ctx.fill();
+  ctx.strokeStyle='#ffd60a';ctx.lineWidth=1.5;ctx.stroke();
+}
+
+// ============================================================
+// ILLUMINANCE ENGINE
+// ============================================================
+function getLI(fx, thetaRad){
+  const lm=fx.lm*(fx.eff/100);
+  const deg=thetaRad*180/Math.PI;
+  if(fx.iesData)return iesGetCd(fx.iesData,deg);
+  switch(fx.dist){
+    case 'lambertian': return (lm/Math.PI)*Math.cos(thetaRad);
+    case 'narrow':{
+      const ha=10*Math.PI/180;
+      const n=Math.log(0.5)/Math.log(Math.cos(ha));
+      return (lm*(n+1)/(2*Math.PI))*Math.pow(Math.max(Math.cos(thetaRad),0),n);
+    }
+    case 'medium':{
+      const ha=20*Math.PI/180;
+      const n=Math.log(0.5)/Math.log(Math.cos(ha));
+      return (lm*(n+1)/(2*Math.PI))*Math.pow(Math.max(Math.cos(thetaRad),0),n);
+    }
+    case 'wide':{
+      const ha=35*Math.PI/180;
+      const n=Math.log(0.5)/Math.log(Math.cos(ha));
+      return (lm*(n+1)/(2*Math.PI))*Math.pow(Math.max(Math.cos(thetaRad),0),n);
+    }
+    case 'bat':{
+      const pk=40*Math.PI/180,kk=-18;
+      return (lm/Math.PI)*Math.exp(kk*(thetaRad-pk)*(thetaRad-pk))*Math.cos(thetaRad);
+    }
+    case 'asym':{
+      if(thetaRad>Math.PI/2)return 0;
+      return (lm/Math.PI)*Math.pow(Math.cos(thetaRad-Math.PI/6),2);
+    }
+    default: return (lm/Math.PI)*Math.cos(thetaRad);
+  }
+}
+
+function calcPt(px,py,placed,fxMap,H,rho){
+  let E=0;
+  for(const pl of placed){
+    const dxMm=pxMm(px-pl.ix),dyMm=pxMm(py-pl.iy);
+    const hz=Math.hypot(dxMm,dyMm)/1000;
+    const r=Math.hypot(hz,H);
+    if(r<0.01)continue;
+    const cosT=H/r,theta=Math.acos(Math.min(cosT,1));
+    const fx=fxMap[pl.fxId];if(!fx)continue;
+    const I=getLI(fx,theta);
+    const Ed=I*Math.pow(cosT,3)/(H*H);
+    E+=Ed*(1+rho*0.28)*(pl.dim||1);
+  }
+  return Math.max(E,0);
+}
+
+async function runCalc(){
+  if(!S.image){toast('⚠️ 図面を読み込んでください');return;}
+  if(!S.pxPerMm){toast('⚠️ 縮尺を設定してください');return;}
+  if(S.placed.length===0){toast('⚠️ 器具を配置してください');return;}
+  const cH=parseFloat(document.getElementById('ceil-h').value)||2500;
+  const wH=parseFloat(document.getElementById('work-h').value)||800;
+  const H=(cH-wH)/1000;
+  if(H<=0){toast('⚠️ 天井高 > 作業面高 にしてください');return;}
+  const rho=parseFloat(document.getElementById('reflectance').value)||50;
+  const gr=parseInt(document.getElementById('grid-res').value)||10;
+  const fxMap={};
+  [...PRESETS,...S.customFx].forEach(f=>{fxMap[f.id]=f;});
+  const iw=S.image.width,ih=S.image.height;
+  const cols=Math.ceil(iw/gr),rows=Math.ceil(ih/gr);
+  const grid=new Float32Array(cols*rows);
+  toast('🔄 計算中...',60000);prog(10);
+  let done=0;
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      grid[r*cols+c]=calcPt(c*gr+gr/2,r*gr+gr/2,S.placed,fxMap,H,rho/100);
+      done++;
+    }
+    if(r%30===0){prog(10+80*(done/(cols*rows)));await new Promise(res=>setTimeout(res,0));}
+  }
+  let sum=0,minE=Infinity,maxE=-Infinity;
+  for(let i=0;i<grid.length;i++){const v=grid[i];sum+=v;if(v<minE)minE=v;if(v>maxE)maxE=v;}
+  const avg=sum/grid.length;
+  const uo=avg>0?minE/avg:0;
+  const ug=maxE>0?minE/maxE:0;
+  S.calcRes={grid,cols,rows,gr,minE,maxE,avg,uo,ug,iw,ih,H,rho,cH,wH};
+  prog(100);
+  toast(`✅ 計算完了 — 平均 ${avg.toFixed(0)} lux`);
+  const cls=(v,lo,hi)=>v>=hi?'gd':v>=lo?'wn':'bd';
+  setRv('r-avg',avg.toFixed(0)+' lux',cls(avg,300,500));
+  setRv('r-max',maxE.toFixed(0)+' lux','');
+  setRv('r-min',minE.toFixed(0)+' lux',cls(minE,200,400));
+  setRv('r-uo',uo.toFixed(3),cls(uo,0.4,0.7));
+  setRv('r-ug',ug.toFixed(3),cls(ug,0.1,0.3));
+  document.getElementById('r-ch').textContent=cH+' mm';
+  document.getElementById('r-mh').textContent=(H*1000).toFixed(0)+' mm';
+  document.getElementById('r-cnt').textContent=S.placed.length+' 台';
+  const totalLm=S.placed.reduce((a,pl)=>{const f=fxMap[pl.fxId];return a+(f?f.lm*(f.eff/100):0);},0);
+  document.getElementById('r-lm').textContent=Math.round(totalLm).toLocaleString()+' lm';
+  document.getElementById('sb-lux').textContent=avg.toFixed(0)+' lux(avg)';
+  switchTab('result');
+  drawHeatmap();drawContour();drawUI();updateLegend();
+}
+
+function setRv(id,v,cls){
+  const e=document.getElementById(id);
+  e.textContent=v;
+  e.className='res-val'+(cls?' '+cls:'');
+}
+
+// ============================================================
+// HEATMAP
+// ============================================================
+function lux2rgb(lux,mn,mx){
+  const t=mx>mn?Math.min((lux-mn)/(mx-mn),1):0;
+  let r,g,b;
+  if(t<0.25){const s=t/0.25;r=0;g=Math.round(s*255);b=255;}
+  else if(t<0.5){const s=(t-0.25)/0.25;r=0;g=255;b=Math.round((1-s)*255);}
+  else if(t<0.75){const s=(t-0.5)/0.25;r=Math.round(s*255);g=255;b=0;}
+  else{const s=(t-0.75)/0.25;r=255;g=Math.round((1-s)*255);b=0;}
+  return[r,g,b];
+}
+
+function drawHeatmap(){
+  const w=c1.width,h=c1.height;
+  x1.clearRect(0,0,w,h);
+  if(!S.calcRes||!S.layers.heat)return;
+  const{grid,cols,rows,gr,minE,maxE}=S.calcRes;
+  const off=document.createElement('canvas');off.width=cols;off.height=rows;
+  const ctx=off.getContext('2d');
+  const id=ctx.createImageData(cols,rows);
+  const d=id.data;
+  for(let i=0;i<cols*rows;i++){
+    const[r,g,b]=lux2rgb(grid[i],minE,maxE);
+    d[i*4]=r;d[i*4+1]=g;d[i*4+2]=b;d[i*4+3]=200;
+  }
+  ctx.putImageData(id,0,0);
+  const tl=i2c(0,0),br=i2c(cols*gr,rows*gr);
+  x1.save();
+  x1.globalAlpha=parseFloat(document.getElementById('heat-op').value)/100;
+  x1.imageSmoothingEnabled=true;x1.imageSmoothingQuality='high';
+  x1.drawImage(off,tl.x,tl.y,br.x-tl.x,br.y-tl.y);
+  x1.restore();
+}
+
+// ============================================================
+// CONTOUR (Marching Squares)
+// ============================================================
+function drawContour(){
+  const w=c2.width,h=c2.height;
+  x2.clearRect(0,0,w,h);
+  if(!S.calcRes)return;
+  const{grid,cols,rows,gr,minE,maxE}=S.calcRes;
+
+  if(S.layers.contour){
+    const step=luxStep(minE,maxE);
+    const start=Math.ceil(minE/step)*step;
+    for(let lv=start;lv<=maxE;lv+=step){
+      x2.beginPath();
+      marchSq(grid,cols,rows,lv,(ax,ay,bx,by)=>{
+        const pa=i2c(ax*gr,ay*gr),pb=i2c(bx*gr,by*gr);
+        x2.moveTo(pa.x,pa.y);x2.lineTo(pb.x,pb.y);
+      });
+      const[r,g,b]=lux2rgb(lv,minE,maxE);
+      x2.strokeStyle=`rgb(${r},${g},${b})`;x2.lineWidth=1.2;x2.stroke();
+    }
+  }
+
+  if(S.layers.value&&S.vz>0.5){
+    const{grid:gr2,cols:c2c,rows:r2r,gr:grs,minE:mn,maxE:mx}=S.calcRes;
+    const step=Math.max(1,Math.round(55/(grs*S.vz)));
+    x2.textAlign='center';x2.textBaseline='middle';
+    const fs=Math.round(8*S.vz+2);
+    x2.font=`bold ${fs}px sans-serif`;
+    for(let r=0;r<r2r;r+=step){
+      for(let cc=0;cc<c2c;cc+=step){
+        const v=gr2[r*c2c+cc];
+        const[rv,gv,bv]=lux2rgb(v,mn,mx);
+        const p=i2c(cc*grs+grs/2,r*grs+grs/2);
+        const lbl=v<1000?v.toFixed(0):(v/1000).toFixed(1)+'k';
+        x2.fillStyle=`rgba(${rv},${gv},${bv},0.9)`;
+        x2.fillText(lbl+'lx',p.x,p.y);
+      }
+    }
+  }
+}
+
+function luxStep(mn,mx){
+  const rng=mx-mn;
+  for(const s of[25,50,100,200,500,1000])if(rng/s>=3&&rng/s<=16)return s;
+  return Math.max(50,Math.round(rng/8/50)*50);
+}
+
+function marchSq(grid,cols,rows,lv,cb){
+  function lerp(va,vb,xa,ya,xb,yb){const t=(lv-va)/(vb-va);return{x:xa+t*(xb-xa),y:ya+t*(yb-ya)};}
+  for(let r=0;r<rows-1;r++){
+    for(let c=0;c<cols-1;c++){
+      const v00=grid[r*cols+c],v10=grid[r*cols+c+1],v01=grid[(r+1)*cols+c],v11=grid[(r+1)*cols+c+1];
+      const idx=(v00>lv?8:0)|(v10>lv?4:0)|(v11>lv?2:0)|(v01>lv?1:0);
+      if(idx===0||idx===15)continue;
+      const T=()=>lerp(v00,v10,c,r,c+1,r);
+      const B=()=>lerp(v01,v11,c,r+1,c+1,r+1);
+      const L=()=>lerp(v00,v01,c,r,c,r+1);
+      const R=()=>lerp(v10,v11,c+1,r,c+1,r+1);
+      const seg={1:[T,R],2:[B,R],3:[T,B],4:[T,L],5:[B,L,T,R],6:[L,R],7:[L,B],
+                 8:[L,B],9:[L,R],10:[T,R,B,L],11:[T,R],12:[T,B],13:[B,R],14:[T,L]}[idx];
+      if(!seg)continue;
+      for(let i=0;i<seg.length;i+=2){const a=seg[i](),b=seg[i+1]();cb(a.x,a.y,b.x,b.y);}
+    }
+  }
+}
+
+// ============================================================
+// UI CANVAS
+// ============================================================
+function drawUI(){
+  const w=c3.width,h=c3.height;
+  x3.clearRect(0,0,w,h);
+
+  if(S.layers.fixture){
+    S.placed.forEach(pl=>{
+      const allFx=[...PRESETS,...S.customFx];
+      const fx=allFx.find(f=>f.id===pl.fxId);
+      const cp=i2c(pl.ix,pl.iy);
+      const sel=pl.id===S.selPlId;
+      const r=sel?13:9;
+      const col=fx?fx.col:'#ffd60a';
+      x3.beginPath();x3.arc(cp.x,cp.y,r,0,Math.PI*2);
+      x3.fillStyle=col+(sel?'ff':'cc');x3.fill();
+      x3.strokeStyle=sel?'#fff':'rgba(255,255,255,0.4)';
+      x3.lineWidth=sel?2:1;x3.stroke();
+      if(S.vz>0.5){
+        x3.font=`${sel?12:9}px sans-serif`;
+        x3.fillStyle='#000';x3.textAlign='center';x3.textBaseline='middle';
+        x3.fillText('💡',cp.x,cp.y);
+      }
+    });
+  }
+
+  S.walls.forEach(wl=>{
+    if(wl.pts.length<2)return;
+    x3.beginPath();
+    wl.pts.forEach((p,i)=>{const cp=i2c(p.x,p.y);i===0?x3.moveTo(cp.x,cp.y):x3.lineTo(cp.x,cp.y);});
+    x3.strokeStyle='rgba(255,159,10,0.85)';x3.lineWidth=2.5;x3.setLineDash([]);x3.stroke();
+  });
+
+  if(S.roomPoly.length>2){
+    x3.beginPath();
+    S.roomPoly.forEach((p,i)=>{const cp=i2c(p.x,p.y);i===0?x3.moveTo(cp.x,cp.y):x3.lineTo(cp.x,cp.y);});
+    x3.closePath();
+    x3.strokeStyle='rgba(10,132,255,0.75)';x3.lineWidth=2;x3.stroke();
+    x3.fillStyle='rgba(10,132,255,0.05)';x3.fill();
+  }
+
+  if(S.tool==='calib'&&S.calib2.p1){
+    const cp=i2c(S.calib2.p1.x,S.calib2.p1.y);
+    x3.beginPath();x3.arc(cp.x,cp.y,7,0,Math.PI*2);
+    x3.fillStyle='#ffd60a';x3.fill();
+    x3.strokeStyle='#fff';x3.lineWidth=1.5;x3.stroke();
+    x3.font='bold 11px sans-serif';x3.fillStyle='#ffd60a';
+    x3.textAlign='left';x3.textBaseline='top';
+    x3.fillText('P1',cp.x+10,cp.y-14);
+  }
+
+  if(S.tool==='wall'&&S.wallDraw.pts.length>0){
+    x3.beginPath();
+    S.wallDraw.pts.forEach((p,i)=>{const cp=i2c(p.x,p.y);i===0?x3.moveTo(cp.x,cp.y):x3.lineTo(cp.x,cp.y);});
+    x3.strokeStyle='rgba(255,159,10,0.9)';x3.lineWidth=2;x3.setLineDash([5,4]);x3.stroke();x3.setLineDash([]);
+    S.wallDraw.pts.forEach(p=>{const cp=i2c(p.x,p.y);x3.beginPath();x3.arc(cp.x,cp.y,4,0,Math.PI*2);x3.fillStyle='#ff9f0a';x3.fill();});
+  }
+  if(S.tool==='room'&&S.roomDraw.pts.length>0){
+    x3.beginPath();
+    S.roomDraw.pts.forEach((p,i)=>{const cp=i2c(p.x,p.y);i===0?x3.moveTo(cp.x,cp.y):x3.lineTo(cp.x,cp.y);});
+    if(S.roomDraw.pts.length>2){const first=i2c(S.roomDraw.pts[0].x,S.roomDraw.pts[0].y);x3.lineTo(first.x,first.y);}
+    x3.strokeStyle='rgba(10,132,255,0.9)';x3.lineWidth=2;x3.setLineDash([5,4]);x3.stroke();x3.setLineDash([]);
+    S.roomDraw.pts.forEach(p=>{const cp=i2c(p.x,p.y);x3.beginPath();x3.arc(cp.x,cp.y,4,0,Math.PI*2);x3.fillStyle='#0a84ff';x3.fill();});
+  }
+}
+
+function updateLegend(){
+  const res=S.calcRes;
+  const leg=document.getElementById('legend');
+  if(!res){leg.style.display='none';return;}
+  leg.style.display='block';
+  document.getElementById('leg-min').textContent=Math.round(res.minE)+'lx';
+  document.getElementById('leg-max').textContent=Math.round(res.maxE)+'lx';
+  const lc=document.getElementById('leg-canvas');
+  lc.width=lc.clientWidth||120;
+  const lx=lc.getContext('2d');
+  const g=lx.createLinearGradient(0,0,lc.width,0);
+  g.addColorStop(0,'rgb(0,0,255)');g.addColorStop(0.25,'rgb(0,255,255)');
+  g.addColorStop(0.5,'rgb(0,255,0)');g.addColorStop(0.75,'rgb(255,255,0)');
+  g.addColorStop(1,'rgb(255,0,0)');
+  lx.fillStyle=g;lx.fillRect(0,0,lc.width,lc.height);
+}
+
+// ============================================================
+// BACKGROUND
+// ============================================================
+function drawBg(){
+  const w=c0.width,h=c0.height;
+  x0.clearRect(0,0,w,h);
+  x0.strokeStyle='rgba(128,128,128,0.07)';x0.lineWidth=1;
+  const gs=40;
+  for(let x=S.vx%gs;x<w;x+=gs){x0.beginPath();x0.moveTo(x,0);x0.lineTo(x,h);x0.stroke();}
+  for(let y=S.vy%gs;y<h;y+=gs){x0.beginPath();x0.moveTo(0,y);x0.lineTo(w,y);x0.stroke();}
+  if(!S.image)return;
+  x0.save();
+  const ci=i2c(S.image.width/2,S.image.height/2);
+  x0.translate(ci.x,ci.y);x0.rotate(S.rotation*Math.PI/180);
+  x0.drawImage(S.image,-S.image.width/2*S.vz,-S.image.height/2*S.vz,S.image.width*S.vz,S.image.height*S.vz);
+  x0.restore();
+}
+
+function redrawAll(){drawBg();drawHeatmap();drawContour();drawUI();}
+
+// ============================================================
+// VIEW
+// ============================================================
+function resetView(){
+  if(!S.image){S.vx=0;S.vy=0;S.vz=1;redrawAll();return;}
+  const w=CA.clientWidth,h=CA.clientHeight;
+  S.vz=Math.min(w/S.image.width,h/S.image.height)*0.88;
+  S.vx=(w-S.image.width*S.vz)/2;S.vy=(h-S.image.height*S.vz)/2;
+  S.rotation=0;updStatus();redrawAll();
+}
+function rotate(d){S.rotation=((S.rotation+d)%360+360)%360;redrawAll();}
+function zoomIn(){applyZoom(1.2,CA.clientWidth/2,CA.clientHeight/2);}
+function zoomOut(){applyZoom(0.8,CA.clientWidth/2,CA.clientHeight/2);}
+function applyZoom(f,cx,cy){
+  const nz=Math.min(Math.max(S.vz*f,0.04),50);
+  const rt=nz/S.vz;
+  S.vx=cx-(cx-S.vx)*rt;S.vy=cy-(cy-S.vy)*rt;S.vz=nz;
+  updStatus();redrawAll();
+}
+function updStatus(){
+  document.getElementById('sb-zoom').textContent=Math.round(S.vz*100)+'%';
+  document.getElementById('sb-scale').textContent=S.pxPerMm?S.pxPerMm.toFixed(4)+' mm/px':'未設定';
+}
+
+// ============================================================
+// CALIBRATION
+// ============================================================
+function applyPreset(v){
+  if(!v)return;
+  const n=parseFloat(v);const px=0.2645833*n;
+  document.getElementById('px-mm').value=px.toFixed(6);
+  S.pxPerMm=px;updStatus();
+  toast('✅ 縮尺 1/'+n+' を適用');
+}
+function applyDirectCalib(){
+  const v=parseFloat(document.getElementById('px-mm').value);
+  if(!v||v<=0){toast('⚠️ 有効な値を入力してください');return;}
+  S.pxPerMm=v;updStatus();toast('✅ 縮尺を設定しました');
+}
+function confirmCalib(){
+  const real=parseFloat(document.getElementById('calib-real').value);
+  const unit=document.getElementById('calib-unit').value;
+  if(!real||real<=0){toast('⚠️ 実寸を入力してください');return;}
+  if(!S.calib2.p1||!S.calib2.p2){toast('⚠️ 2点を先に指定してください');return;}
+  const px=Math.hypot(S.calib2.p2.x-S.calib2.p1.x,S.calib2.p2.y-S.calib2.p1.y);
+  let mm=real;if(unit==='cm')mm*=10;if(unit==='m')mm*=1000;
+  S.pxPerMm=mm/px;
+  document.getElementById('px-mm').value=S.pxPerMm.toFixed(6);
+  updStatus();closeModal('calib-modal');setTool('pan');
+  S.calib2={step:0,p1:null,p2:null};
+  toast('✅ 2点キャリブ完了！');
+}
+
+// ============================================================
+// TOOL
+// ============================================================
+function setTool(t){
+  S.tool=t;
+  document.querySelectorAll('.tl').forEach(b=>b.classList.remove('a'));
+  const e=document.getElementById('tl-'+t);if(e)e.classList.add('a');
+  CA.className='';
+  if(t==='pan')CA.classList.add('c-pan');
+  else if(t==='place')CA.classList.add('c-place');
+  else if(t==='calib')CA.classList.add('c-calib');
+  else if(t==='wall')CA.classList.add('c-wall');
+  else if(t==='room')CA.classList.add('c-room');
+  document.getElementById('sb-tool').textContent={pan:'移動',place:'器具配置',wall:'壁面',room:'部屋輪郭',calib:'2点キャリブ'}[t]||t;
+}
+
+// ============================================================
+// MOUSE EVENTS
+// ============================================================
+function getPos(e){const r=c3.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+
+CA.addEventListener('mousedown',e=>{
+  if(e.button!==0)return;
+  const pos=getPos(e);const ip=c2i(pos.x,pos.y);
+  if(S.tool==='pan'){S.panning={on:true,sx:pos.x,sy:pos.y,ox:S.vx,oy:S.vy};CA.classList.add('panning');return;}
+  if(S.tool==='place'){
+    if(!S.selFxId){toast('⚠️ 器具を選択してください');return;}
+    const pl={id:uid(),fxId:S.selFxId,ix:ip.x,iy:ip.y,dim:1};
+    S.placed.push(pl);S.selPlId=pl.id;
+    renderPlaced();drawUI();toast('💡 器具を配置しました');
+    closePanel();return;
+  }
+  if(S.tool==='calib'){
+    if(S.calib2.step===0){S.calib2.p1=ip;S.calib2.step=1;toast('✅ 1点目設定。2点目をクリック');drawUI();}
+    else if(S.calib2.step===1){
+      S.calib2.p2=ip;S.calib2.step=2;
+      document.getElementById('calib-px').textContent=Math.hypot(ip.x-S.calib2.p1.x,ip.y-S.calib2.p1.y).toFixed(2);
+      openModal('calib-modal');drawUI();
+    }
+    return;
+  }
+  if(S.tool==='wall'){
+    if(e.detail===2){
+      if(S.wallDraw.pts.length>=2){S.walls.push({pts:[...S.wallDraw.pts]});S.wallDraw={pts:[]};toast('🧱 壁面設定完了');drawUI();}
+      return;
+    }
+    S.wallDraw.pts.push(ip);drawUI();return;
+  }
+  if(S.tool==='room'){
+    if(e.detail===2){
+      if(S.roomDraw.pts.length>=3){S.roomPoly=[...S.roomDraw.pts];S.roomDraw={pts:[]};toast('🟦 部屋輪郭設定完了');drawUI();}
+      return;
+    }
+    S.roomDraw.pts.push(ip);drawUI();return;
+  }
+});
+
+CA.addEventListener('mousemove',e=>{
+  const pos=getPos(e);const ip=c2i(pos.x,pos.y);
+  document.getElementById('sb-pos').textContent=`${Math.round(ip.x)},${Math.round(ip.y)}`;
+  if(S.calcRes){
+    const{grid,cols,rows,gr}=S.calcRes;
+    const cc=Math.floor(ip.x/gr),rr=Math.floor(ip.y/gr);
+    if(cc>=0&&cc<cols&&rr>=0&&rr<rows)
+      document.getElementById('sb-lux').textContent=grid[rr*cols+cc].toFixed(0)+' lux';
+  }
+  if(S.panning.on){
+    S.vx=S.panning.ox+(pos.x-S.panning.sx);S.vy=S.panning.oy+(pos.y-S.panning.sy);
+    updStatus();redrawAll();
+  }
+});
+
+CA.addEventListener('mouseup',()=>{if(S.panning.on){S.panning.on=false;CA.classList.remove('panning');}});
+CA.addEventListener('wheel',e=>{e.preventDefault();const pos=getPos(e);applyZoom(e.deltaY<0?1.12:0.88,pos.x,pos.y);},{passive:false});
+
+function ev_dragover(e){e.preventDefault();document.getElementById('drop-ov').classList.add('show');}
+CA.addEventListener('dragleave',()=>document.getElementById('drop-ov').classList.remove('show'));
+function ev_drop(e){e.preventDefault();document.getElementById('drop-ov').classList.remove('show');const f=e.dataTransfer.files[0];if(f)loadFobj(f);}
+
+// ============================================================
+// TOUCH EVENTS
+// ============================================================
+function getTouchDist(t){return Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);}
+function getTouchMid(t,r){return{x:(t[0].clientX+t[1].clientX)/2-r.left,y:(t[0].clientY+t[1].clientY)/2-r.top};}
+
+CA.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  S.tc=Array.from(e.touches);
+  if(S.tc.length===2){
+    S.lastDist=getTouchDist(S.tc);
+    S.panning.on=false;
+  } else if(S.tc.length===1){
+    const r=c3.getBoundingClientRect();
+    const t=S.tc[0];
+    const pos={x:t.clientX-r.left,y:t.clientY-r.top};
+    if(S.tool==='pan'){
+      S.panning={on:true,sx:pos.x,sy:pos.y,ox:S.vx,oy:S.vy};
+    } else {
+      CA.dispatchEvent(new MouseEvent('mousedown',{button:0,clientX:t.clientX,clientY:t.clientY,detail:1,bubbles:true}));
+    }
+  }
+},{passive:false});
+
+CA.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  S.tc=Array.from(e.touches);
+  if(S.tc.length===2){
+    const r=c3.getBoundingClientRect();
+    const d=getTouchDist(S.tc);
+    const mid=getTouchMid(S.tc,r);
+    if(S.lastDist>0)applyZoom(d/S.lastDist,mid.x,mid.y);
+    S.lastDist=d;
+  } else if(S.tc.length===1&&S.panning.on){
+    const r=c3.getBoundingClientRect();
+    const t=S.tc[0];
+    const pos={x:t.clientX-r.left,y:t.clientY-r.top};
+    S.vx=S.panning.ox+(pos.x-S.panning.sx);S.vy=S.panning.oy+(pos.y-S.panning.sy);
+    updStatus();redrawAll();
+  }
+},{passive:false});
+
+CA.addEventListener('touchend',e=>{
+  e.preventDefault();
+  S.tc=Array.from(e.touches);
+  if(S.tc.length<2)S.lastDist=0;
+  if(S.tc.length===0){S.panning.on=false;}
+},{passive:false});
+
+// ============================================================
+// PANEL TOGGLE
+// ============================================================
+function togglePanel(){
+  const p=document.getElementById('lpanel');
+  const ov=document.getElementById('panel-overlay');
+  const isMobile=window.innerWidth<=768;
+  if(isMobile){
+    const open=p.classList.toggle('open');
+    ov.classList.toggle('show',open);
+  } else {
+    p.classList.toggle('hidden');
+  }
+}
+function closePanel(){
+  if(window.innerWidth<=768){
+    document.getElementById('lpanel').classList.remove('open');
+    document.getElementById('panel-overlay').classList.remove('show');
+  }
+}
+
+// ============================================================
+// FIXTURE DB
+// ============================================================
+function renderDB(){
+  document.getElementById('db-preset').innerHTML=PRESETS.map(f=>`
+    <div class="fx-card ${f.id===S.selFxId?'sel':''}" onclick="selFx('${f.id}')">
+      <div class="fx-card-top"><div class="fx-name">${f.name}</div></div>
+      <div class="fx-meta"><span class="badge b${f.type==='led'?'l':f.type==='fl'?'f':'h'}">${f.type.toUpperCase()}</span>${f.lm.toLocaleString()}lm · ${f.w}W · ${f.cct}K</div>
+    </div>`).join('');
+  const cList=document.getElementById('db-custom');
+  if(!S.customFx.length){cList.innerHTML='<div style="font-size:.7rem;color:var(--text3);text-align:center;padding:10px 0">カスタム器具なし</div>';return;}
+  cList.innerHTML=S.customFx.map(f=>`
+    <div class="fx-card ${f.id===S.selFxId?'sel':''}" onclick="selFx('${f.id}')">
+      <div class="fx-card-top">
+        <div class="fx-name">${f.name}</div>
+        <button class="fx-del" onclick="event.stopPropagation();delCustomFx('${f.id}')">✕</button>
+      </div>
+      <div class="fx-meta"><span class="badge bl">${f.type.toUpperCase()}</span>${f.lm.toLocaleString()}lm · ${f.w}W · ${f.cct}K</div>
+    </div>`).join('');
+}
+
+function selFx(id){
+  S.selFxId=id;
+  if(S.tool!=='place')setTool('place');
+  renderDB();renderPlaced();
+  toast('💡 器具選択完了 → 図面をタップして配置');
+  closePanel();
+}
+
+function openFxModal(id){
+  S.editFxId=id;S.iesData=null;
+  document.getElementById('ies-prev-wrap').style.display='none';
+  if(id){
+    const f=S.customFx.find(x=>x.id===id);if(!f)return;
+    document.getElementById('fm-title').textContent='✏️ 器具を編集';
+    document.getElementById('fm-name').value=f.name;
+    document.getElementById('fm-maker').value=f.maker||'';
+    document.getElementById('fm-type').value=f.type;
+    document.getElementById('fm-lm').value=f.lm;
+    document.getElementById('fm-w').value=f.w;
+    document.getElementById('fm-cct').value=f.cct;
+    document.getElementById('fm-ra').value=f.ra;
+    document.getElementById('fm-beam').value=f.beam;
+    document.getElementById('fm-dist').value=f.dist;
+    document.getElementById('fm-eff').value=f.eff;
+    document.getElementById('fm-col').value=f.col||'#ffd60a';
+    document.getElementById('fm-note').value=f.note||'';
+  } else {
+    document.getElementById('fm-title').textContent='💡 器具を作成';
+    ['fm-name','fm-maker','fm-note'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('fm-type').value='led';
+    document.getElementById('fm-lm').value='1500';
+    document.getElementById('fm-w').value='14';
+    document.getElementById('fm-cct').value='4000';
+    document.getElementById('fm-ra').value='80';
+    document.getElementById('fm-beam').value='90';
+    document.getElementById('fm-dist').value='lambertian';
+    document.getElementById('fm-eff').value='85';
+    document.getElementById('fm-col').value='#ffd60a';
+  }
+  openModal('fx-modal');
+}
+
+function saveFx(){
+  const name=document.getElementById('fm-name').value.trim();
+  if(!name){toast('⚠️ 器具名を入力してください');return;}
+  const f={
+    id:S.editFxId||uid(),name,
+    maker:document.getElementById('fm-maker').value.trim(),
+    type:document.getElementById('fm-type').value,
+    lm:parseFloat(document.getElementById('fm-lm').value)||1500,
+    w:parseFloat(document.getElementById('fm-w').value)||14,
+    cct:parseFloat(document.getElementById('fm-cct').value)||4000,
+    ra:parseFloat(document.getElementById('fm-ra').value)||80,
+    beam:parseFloat(document.getElementById('fm-beam').value)||90,
+    dist:document.getElementById('fm-dist').value,
+    eff:parseFloat(document.getElementById('fm-eff').value)||85,
+    col:document.getElementById('fm-col').value,
+    note:document.getElementById('fm-note').value.trim(),
+    iesData:S.iesData||null,
+  };
+  if(S.editFxId){const i=S.customFx.findIndex(x=>x.id===S.editFxId);if(i!==-1)S.customFx[i]=f;}
+  else S.customFx.push(f);
+  closeModal('fx-modal');renderDB();toast('✅ 器具を保存しました');
+}
+
+function delCustomFx(id){
+  S.customFx=S.customFx.filter(f=>f.id!==id);
+  if(S.selFxId===id)S.selFxId=null;
+  renderDB();toast('🗑 器具を削除しました');
+}
+
+// ============================================================
+// PLACED LIST
+// ============================================================
+function renderPlaced(){
+  document.getElementById('pl-count').textContent=S.placed.length;
+  const list=document.getElementById('pl-list');
+  if(!S.placed.length){list.innerHTML='<div style="font-size:.7rem;color:var(--text3);text-align:center;padding:12px 0">器具を配置してください</div>';return;}
+  const allFx=[...PRESETS,...S.customFx];
+  list.innerHTML=S.placed.map((pl,i)=>{
+    const fx=allFx.find(f=>f.id===pl.fxId);
+    return`<div class="pl-item ${pl.id===S.selPlId?'sel':''}" onclick="selPl('${pl.id}')">
+      <div class="pl-dot" style="background:${fx?fx.col:'#aaa'}"></div>
+      <div class="pl-body">
+        <div class="pl-name">${i+1}. ${fx?fx.name:'不明'}</div>
+        <div class="pl-coord">X:${Math.round(pxMm(pl.ix))}mm Y:${Math.round(pxMm(pl.iy))}mm</div>
+      </div>
+      <button class="pl-del" onclick="event.stopPropagation();delPl('${pl.id}')">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function selPl(id){S.selPlId=S.selPlId===id?null:id;renderPlaced();drawUI();}
+function delPl(id){
+  S.placed=S.placed.filter(p=>p.id!==id);
+  if(S.selPlId===id)S.selPlId=null;
+  renderPlaced();drawUI();toast('🗑 器具を削除しました');
+}
+function clearPlaced(){
+  if(!confirm('全配置済み器具を削除しますか？'))return;
+  S.placed=[];S.selPlId=null;renderPlaced();drawUI();toast('🗑 全器具を削除しました');
+}
+
+// ============================================================
+// LAYER TOGGLES
+// ============================================================
+function setHeatOp(v){
+  document.getElementById('heat-op-v').textContent=v+'%';
+  c1.style.opacity=v/100;
+}
+function toggleLayer(k){
+  S.layers[k]=!S.layers[k];
+  const b=document.getElementById('tog-'+k);
+  if(b)b.classList.toggle('a',S.layers[k]);
+  redrawAll();
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(t){
+  ['db','placed','result'].forEach(n=>{
+    document.getElementById('tab-'+n).classList.toggle('a',n===t);
+    document.getElementById('cont-'+n).style.display=n===t?'block':'none';
+  });
+}
+
+// ============================================================
+// REPORT
+// ============================================================
+function openReport(){
+  if(!S.calcRes){toast('⚠️ 先に照度計算を実行してください');return;}
+  const res=S.calcRes;
+  const allFx=[...PRESETS,...S.customFx];
+  const fxMap={};allFx.forEach(f=>{fxMap[f.id]=f;});
+  const cntMap={};
+  S.placed.forEach(pl=>{cntMap[pl.fxId]=(cntMap[pl.fxId]||0)+1;});
+  const now=new Date();
+  const ds=`${now.getFullYear()}/${pad(now.getMonth()+1)}/${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const cls=(v,lo,hi)=>v>=hi?'<span style="color:var(--green)">✅ 適正</span>':v>=lo?'<span style="color:var(--orange)">⚠️ 注意</span>':'<span style="color:var(--red)">❌ 不足</span>';
+  let fxRows='';
+  Object.keys(cntMap).forEach(fid=>{
+    const f=fxMap[fid];if(!f)return;
+    const cnt=cntMap[fid];
+    const tlm=Math.round(f.lm*(f.eff/100)*cnt);
+    fxRows+=`<tr><td>${f.name}</td><td>${f.type.toUpperCase()}</td><td>${f.lm.toLocaleString()} lm</td><td>${f.w}W</td><td>${f.cct}K</td><td style="text-align:center">${cnt}</td><td>${tlm.toLocaleString()} lm</td></tr>`;
+  });
+  document.getElementById('rep-body').innerHTML=`
+    <div style="font-size:.76rem;color:var(--text2);margin-bottom:12px">
+      <strong style="color:var(--text)">作成日時:</strong> ${ds}&nbsp;&nbsp;
+      <strong style="color:var(--text)">図面:</strong> ${S.imageName||'(未設定)'}
+    </div>
+    <div class="res-box">
+      <div class="res-title">🏗 空間条件</div>
+      <table style="width:100%;font-size:.78rem;border-collapse:collapse;">
+        <tr><td style="padding:3px 0;color:var(--text2)">天井高</td><td style="font-weight:700">${res.cH} mm</td>
+            <td style="padding:3px 0;color:var(--text2)">作業面高</td><td style="font-weight:700">${res.wH} mm</td></tr>
+        <tr><td style="color:var(--text2)">取付高 H</td><td style="font-weight:700">${(res.H*1000).toFixed(0)} mm</td>
+            <td style="color:var(--text2)">反射率</td><td style="font-weight:700">${res.rho} %</td></tr>
+      </table>
+    </div>
+    <div class="res-box">
+      <div class="res-title">📊 照度計算結果</div>
+      <table style="width:100%;font-size:.78rem;border-collapse:collapse;">
+        <tr><td style="padding:3px 8px 3px 0;color:var(--text2)">平均照度 Eav</td>
+            <td style="font-weight:800;font-size:.98rem">${res.avg.toFixed(0)} lux</td>
+            <td>${cls(res.avg,300,500)}</td></tr>
+        <tr><td style="padding:3px 8px 3px 0;color:var(--text2)">最大照度 Emax</td>
+            <td style="font-weight:700">${res.maxE.toFixed(0)} lux</td><td>—</td></tr>
+        <tr><td style="padding:3px 8px 3px 0;color:var(--text2)">最小照度 Emin</td>
+            <td style="font-weight:700">${res.minE.toFixed(0)} lux</td>
+            <td>${cls(res.minE,200,400)}</td></tr>
+        <tr><td style="padding:3px 8px 3px 0;color:var(--text2)">均斉度 Uo (Emin/Eav)</td>
+            <td style="font-weight:700">${res.uo.toFixed(3)}</td>
+            <td>${cls(res.uo,0.4,0.7)}</td></tr>
+        <tr><td style="padding:3px 8px 3px 0;color:var(--text2)">均斉度 Ug (Emin/Emax)</td>
+            <td style="font-weight:700">${res.ug.toFixed(3)}</td>
+            <td>${cls(res.ug,0.1,0.3)}</td></tr>
+      </table>
+    </div>
+    <div class="res-box">
+      <div class="res-title">💡 使用器具一覧</div>
+      <table class="rep-table">
+        <thead><tr><th>器具名</th><th>種別</th><th>光束</th><th>消費電力</th><th>色温度</th><th>台数</th><th>合計光束</th></tr></thead>
+        <tbody>${fxRows}</tbody>
+      </table>
+    </div>
+    <div style="font-size:.68rem;color:var(--text3);margin-top:10px;line-height:1.7">
+      ※ 本計算は点計算法（Point-by-Point Method）に基づく簡易シミュレーションです。<br>
+      ※ 反射光は一様拡散近似（係数0.28）を使用しています。精密計算にはDIALux等の専用ソフトをご利用ください。<br>
+      ※ 均斉度の目標値: Uo ≥ 0.7（推奨）、Ug ≥ 0.3（推奨）[JIS Z 9110 参考]
+    </div>`;
+  openModal('rep-modal');
+}
+
+// ============================================================
+// CAPTURE
+// ============================================================
+async function captureAll(){
+  const off=document.createElement('canvas');
+  off.width=c0.width;off.height=c0.height;
+  const ctx=off.getContext('2d');
+  ctx.drawImage(c0,0,0);
+  ctx.globalAlpha=parseFloat(document.getElementById('heat-op').value)/100;
+  ctx.drawImage(c1,0,0);
+  ctx.globalAlpha=1;
+  ctx.drawImage(c2,0,0);
+  ctx.drawImage(c3,0,0);
+  return off.toDataURL('image/png');
+}
+
+// ============================================================
+// EXPORT IMAGE
+// ============================================================
+async function exportImg(){
+  const url=await captureAll();
+  const a=document.createElement('a');
+  a.download=(S.imageName.replace(/\.[^.]+$/,'')||'lightplan')+'_illuminance.png';
+  a.href=url;a.click();
+  toast('🖼 画像を出力しました');
+}
+
+// ============================================================
+// EXPORT PDF（図面＋ヒートマップ）
+// ============================================================
+async function exportPDF(){
+  if(!window.jspdf){
+    toast('⏳ jsPDF読み込み中...');
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+  }
+  const{jsPDF}=window.jspdf;
+  const url=await captureAll();
+  const img=new Image();img.src=url;
+  await new Promise(r=>img.onload=r);
+  const ort=img.width>img.height?'landscape':'portrait';
+  const pdf=new jsPDF({orientation:ort,unit:'px',format:[img.width,img.height]});
+  pdf.addImage(url,'PNG',0,0,img.width,img.height);
+  pdf.save((S.imageName.replace(/\.[^.]+$/,'')||'lightplan')+'_illuminance.pdf');
+  toast('📄 図面PDFを出力しました');
+}
+
+// ============================================================
+// EXPORT REPORT PDF（A4帳票）
+// ============================================================
+async function exportReportPDF(){
+  if(!S.calcRes){toast('⚠️ 先に照度計算を実行してください');return;}
+  if(!window.jspdf){
+    toast('⏳ jsPDF読み込み中...');
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+  }
+  const{jsPDF}=window.jspdf;
+  const res=S.calcRes;
+  const now=new Date();
+  const ds=`${now.getFullYear()}/${pad(now.getMonth()+1)}/${pad(now.getDate())}`;
+  const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+
+  // Header bar
+  pdf.setFillColor(10,132,255);
+  pdf.rect(0,0,210,18,'F');
+  pdf.setTextColor(255,255,255);
+  pdf.setFontSize(14);pdf.setFont('helvetica','bold');
+  pdf.text('LightPlan Pro  —  照度計算帳票',10,12);
+  pdf.setFontSize(8);pdf.setFont('helvetica','normal');
+  pdf.text(`作成日: ${ds}   図面: ${S.imageName||'-'}`,10,17);
+
+  // Section: 空間条件
+  pdf.setTextColor(0,0,0);
+  pdf.setFontSize(11);pdf.setFont('helvetica','bold');
+  pdf.text('■ 空間条件',10,28);
+  pdf.setFontSize(9);pdf.setFont('helvetica','normal');
+  const spaceData=[
+    ['天井高',`${res.cH} mm`,'作業面高',`${res.wH} mm`],
+    ['取付高 H',`${(res.H*1000).toFixed(0)} mm`,'反射率',`${res.rho} %`],
+    ['計算器具数',`${S.placed.length} 台`,'',''],
+  ];
+  spaceData.forEach((r,i)=>{
+    const y=34+i*6;
+    if(r[0])pdf.text(r[0]+': '+r[1],14,y);
+    if(r[2])pdf.text(r[2]+': '+r[3],80,y);
+  });
+
+  // Section: 照度計算結果
+  pdf.setFontSize(11);pdf.setFont('helvetica','bold');
+  pdf.text('■ 照度計算結果',10,56);
+  const resData=[
+    ['平均照度 Eav',res.avg.toFixed(0)+' lux', res.avg>=500?'適正':res.avg>=300?'注意':'不足'],
+    ['最大照度 Emax',res.maxE.toFixed(0)+' lux','—'],
+    ['最小照度 Emin',res.minE.toFixed(0)+' lux', res.minE>=400?'適正':res.minE>=200?'注意':'不足'],
+    ['均斉度 Uo (Emin/Eav)',res.uo.toFixed(3), res.uo>=0.7?'適正':res.uo>=0.4?'注意':'不足'],
+    ['均斉度 Ug (Emin/Emax)',res.ug.toFixed(3), res.ug>=0.3?'適正':res.ug>=0.1?'注意':'不足'],
+  ];
+  pdf.setFontSize(9);pdf.setFont('helvetica','normal');
+  resData.forEach((r,i)=>{
+    const y=62+i*7;
+    pdf.text(r[0]+':',14,y);
+    pdf.setFont('helvetica','bold');
+    pdf.text(r[1],90,y);
+    pdf.setFont('helvetica','normal');
+    pdf.setTextColor(r[2]==='適正'?0:r[2]==='注意'?180:200, r[2]==='適正'?160:r[2]==='注意'?100:0, 0);
+    pdf.text('['+r[2]+']',125,y);
+    pdf.setTextColor(0,0,0);
+  });
+
+  // Section: 使用器具一覧
+  const allFx=[...PRESETS,...S.customFx];
+  const fxMap={};allFx.forEach(f=>{fxMap[f.id]=f;});
+  const cntMap={};S.placed.forEach(pl=>{cntMap[pl.fxId]=(cntMap[pl.fxId]||0)+1;});
+  const tblBody=Object.keys(cntMap).map(fid=>{
+    const f=fxMap[fid];if(!f)return null;
+    const tlm=Math.round(f.lm*(f.eff/100)*cntMap[fid]);
+    return[f.name,f.type.toUpperCase(),f.lm.toLocaleString()+' lm',f.w+'W',f.cct+'K',String(cntMap[fid]),tlm.toLocaleString()+' lm'];
+  }).filter(Boolean);
+
+  let ty=100;
+  pdf.setFontSize(11);pdf.setFont('helvetica','bold');
+  pdf.text('■ 使用器具一覧',10,ty);
+
+  const colW=[62,14,22,16,18,12,26];
+  const colX=[10,72,86,108,124,142,154];
+  const colH=['器具名','種別','光束','電力','色温度','台数','合計光束'];
+  ty+=6;
+  pdf.setFillColor(10,132,255);
+  pdf.rect(10,ty-4,170,7,'F');
+  pdf.setTextColor(255,255,255);
+  pdf.setFontSize(7.5);pdf.setFont('helvetica','bold');
+  colH.forEach((c,i)=>pdf.text(c,colX[i],ty));
+  pdf.setTextColor(0,0,0);pdf.setFont('helvetica','normal');
+  tblBody.forEach((row,ri)=>{
+    ty+=7;
+    if(ri%2===0){pdf.setFillColor(245,247,250);pdf.rect(10,ty-4,170,7,'F');}
+    row.forEach((cell,i)=>pdf.text(String(cell).slice(0,i===0?28:14),colX[i],ty));
+  });
+
+  // Section: 照度分布図
+  ty+=14;
+  pdf.setFontSize(11);pdf.setFont('helvetica','bold');pdf.setTextColor(0,0,0);
+  pdf.text('■ 照度分布図',10,ty);
+  const imgUrl=await captureAll();
+  const aspect=c0.height/c0.width;
+  const imgW=170;
+  const imgH=Math.min(75, imgW*aspect);
+  if(ty+imgH+8<282){
+    pdf.addImage(imgUrl,'PNG',10,ty+4,imgW,imgH);
+    ty+=imgH+8;
+  }
+
+  // Footer note
+  pdf.setFontSize(6);pdf.setFont('helvetica','italic');pdf.setTextColor(140,140,140);
+  const note='※ 点計算法（Point-by-Point Method）による簡易シミュレーション。反射光は一様拡散近似（係数0.28）。精密計算にはDIALux/Relux等をご利用ください。均斉度目標: Uo≥0.7, Ug≥0.3 [JIS Z 9110参考]';
+  pdf.text(pdf.splitTextToSize(note,190),10,291);
+
+  pdf.save('lightplan_report_'+ds.replace(/\//g,'')+'.pdf');
+  toast('📄 帳票PDFを出力しました');
+}
+
+// ============================================================
+// CLEAR ALL
+// ============================================================
+function clearAll(){
+  if(!confirm('全データをリセットしますか？'))return;
+  S.image=null;S.imageName='';S.rotation=0;
+  S.placed=[];S.selPlId=null;
+  S.walls=[];S.roomPoly=[];
+  S.calcRes=null;
+  S.calib2={step:0,p1:null,p2:null};
+  S.wallDraw={pts:[]};S.roomDraw={pts:[]};
+  resetView();renderDB();renderPlaced();
+  document.getElementById('legend').style.display='none';
+  ['r-avg','r-max','r-min','r-uo','r-ug','r-ch','r-mh','r-cnt','r-lm'].forEach(id=>{
+    const e=document.getElementById(id);if(e){e.textContent='-';e.className='res-val';}
+  });
+  document.getElementById('sb-lux').textContent='-';
+  toast('🗑 全消去しました');
+}
+
+// ============================================================
+// KEYBOARD
+// ============================================================
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    ['fx-modal','calib-modal','rep-modal','help-modal'].forEach(closeModal);
+    if(S.tool==='calib'){S.calib2={step:0,p1:null,p2:null};drawUI();}
+    if(S.tool==='wall'){S.wallDraw={pts:[]};drawUI();}
+    if(S.tool==='room'){S.roomDraw={pts:[]};drawUI();}
+    closePanel();
+  }
+  if(e.key==='Delete'&&S.selPlId)delPl(S.selPlId);
+  if((e.key==='+'||e.key==='=')&&!e.target.matches('input,select,textarea'))zoomIn();
+  if(e.key==='-'&&!e.target.matches('input,select,textarea'))zoomOut();
+  if((e.key==='r'||e.key==='R')&&!e.target.matches('input,select,textarea'))runCalc();
+  if((e.key==='p'||e.key==='P')&&!e.target.matches('input,select,textarea'))setTool('pan');
+  if((e.key==='?'||e.key==='/')&&!e.target.matches('input,select,textarea'))openModal('help-modal');
+});
+
+// ============================================================
+// INIT
+// ============================================================
+function init(){
+  applyPreset('50');
+  renderDB();
+  renderPlaced();
+  setTool('pan');
+  updStatus();
+  setHeatOp(60);
+  resizeCvs();
+}
+init();
+</script>
+</body>
+</html>
